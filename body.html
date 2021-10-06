@@ -1,0 +1,85 @@
+<?php
+    session_start();
+    include('databaseconnect.php');
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="fontawesome/css/all.css">
+    <link rel="stylesheet" href="bodystyle.css">
+    <title>Document</title>
+</head>
+        <nav>
+            <!--la barre de navigation-->
+            <div class="wrapper">
+                <div class="logo"> Swaggance</div>
+                <ul class="nav-links">
+                    <li><label for="srch"><i class="fas fa-search"></i></label><input type="text"><button id="srch"></button></li>
+                    <li><a href="#">Acceuil</a></li>
+                    <!--menu deroulant-->
+                        <li>
+                            <a href="#">Catégories</a>
+                            <ul class="drop-menu">
+                                <li><a href="#">menu-drop1</a></li>
+                                <li><a href="#">menu-drop2</a></li>
+                                <li><a href="#">menu-drop3</a></li>
+                                <li><a href="#">menu-drop4</a></li>
+                            </ul>
+                        </li>
+                    <!---->
+                    <li>
+                        <li ><a href="<?= 'post.php?id_user='.$_GET['id_user'].'' ?>">Poster</a></li>
+                    </li>
+                    <li><a href="#">Services</a></li>
+                    <li id="account"><a href="#">S'inscrire</a></li>
+                    <li id="account"><a href="#">Se connecter</a></li>
+                </ul>
+
+            </div>
+            <div class="mobile-nav">
+                <span class="user" id="use"><img src="icones/user.png" ></span>
+                <span class="close" id="close"><img src="icones/cancel.png" ></span>
+                <span class="logo"><h2>Swaggance</h2> <input type="text" placeholder="Rechercher"></span>
+                <span class="menu" id="menu"><img src="icones/menu.png"></span>
+            </div>
+                <!--Menu pour l utilisareur non connecté-->
+                    <div class="sub-menu" id="sub-menu">
+                        <div class="user-info">
+                            <ul>
+                                <li>Connexion</li>
+                                <li>inscription </li>
+                                <li>Aide</li>
+                            </ul>
+                        </div>
+                    </div>
+                <!---->
+                <!--Menu pour l utilisateur connecté-->
+                    <div class="connected" id="connected">
+                        <div class="compte">
+                            <span class="compte-info"> <span><h5>Yann</h5></span><span>Cotan Kouassi</span></span>
+                            <span class="avatar"><img src="jordanunc.jpeg" alt=""></span>
+                        </div>
+                        <div class="options">
+                            <ul>
+                                <li><img src="icones/bouton-daccueil.png" alt=""> Acceuil</li>
+                                <li><img src="icones/shopping-cart.png" alt=""> Panier</li>
+                                <li><img src="icones/dashboard.png" alt=""> Mon Compte</li>
+                                <li><img src="icones/wish-list.png" alt=""> Liste de Souhaits</li>
+                                <li><img src="icones/nouvel-article.png" alt="">Nouvelle annonce</li>
+                                <li><img src="icones/help.png" alt=""> Assistance</li>
+                                <li><img src="icones/exit.png" alt=""> Déconnexion</li>
+                            </ul>
+                        </div>
+                    </div>
+                <!---->
+                <!--Menu des Categories-->
+                    <div class="catalogue" id="catalogue">
+                    </div>
+                <!----------------------->
+            <!---->
+        </nav>
+        <script src="app.js"></script>
+</html>
