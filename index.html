@@ -3,107 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yann Cotan — Développeur Web Fullstack</title>
-  <meta name="description" content="Yann Cotan, développeur web fullstack à Abidjan. React, Next.js, Node.js, PostgreSQL, Redis, Docker, Nginx. Disponible pour des missions freelance." />
-  <meta name="theme-color" content="#07070b" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2307070b'/><text x='50' y='68' font-size='56' text-anchor='middle' font-family='sans-serif' font-weight='700' fill='%237c5cff'>YC</text></svg>" />
+  <title>Terminal Cotan</title>
+  <meta name="description" content="Portfolio de Yann Cotan, développeur web fullstack à Abidjan, présenté comme un terminal à conteneurs en 3D. Disponible pour des missions freelance." />
+  <meta name="theme-color" content="#d8d3c6" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23ff5b14'/><rect x='8' y='14' width='48' height='36' fill='%2316150f'/><path d='M8 24h48M8 40h48' stroke='%23f4b400' stroke-width='3'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <canvas id="bg" aria-hidden="true"></canvas>
-  <div class="cursor" aria-hidden="true"></div>
-  <div class="loader" aria-hidden="true"><span class="loader__count">0</span></div>
+  <canvas id="yard" aria-hidden="true"></canvas>
 
-  <header class="nav">
-    <a href="#top" class="nav__logo">YC<span>.</span></a>
-    <nav>
-      <a href="#about">À propos</a>
-      <a href="#skills">Stack</a>
-      <a href="#experience">Parcours</a>
-      <a href="#projects">Projets</a>
-      <a href="#contact" class="nav__cta magnetic">Me contacter</a>
+  <div class="hud" id="hud">
+    <header class="plate">
+      <div class="plate__name">YANN COTAN</div>
+      <div class="plate__role mono">Développeur web fullstack · Abidjan</div>
+      <div class="plate__status mono"><i></i> Disponible en freelance</div>
+    </header>
+
+    <nav class="nav" aria-label="Zones du terminal">
+      <button data-zone="stack"><b>A</b> Stack</button>
+      <button data-zone="parcours"><b>B</b> Parcours</button>
+      <button data-zone="projets"><b>C</b> Projets</button>
+      <button data-zone="formation"><b>D</b> Formation</button>
+      <button data-zone="gate"><b>↗</b> Contact</button>
+      <button data-action="about" class="nav__alt">Accueil</button>
+      <button data-action="list" class="nav__alt">Vue liste</button>
     </nav>
-  </header>
 
-  <main id="top">
-    <section class="hero">
-      <p class="eyebrow mono"><span class="dot"></span> Disponible pour missions freelance</p>
-      <h1 class="hero__title" aria-label="Je construis des produits web rapides et solides">
-        <span class="line"><span class="line__in">Je construis</span></span>
-        <span class="line"><span class="line__in">des produits web</span></span>
-        <span class="line"><span class="line__in grad">rapides &amp; solides.</span></span>
-      </h1>
-      <p class="hero__sub">
-        Yann Cotan — développeur web fullstack à Abidjan. Du front interactif à l'infrastructure :
-        React, Node.js, PostgreSQL, Docker.
-      </p>
-      <div class="hero__actions">
-        <a href="#projects" class="btn magnetic">Voir mon travail</a>
-        <a href="#contact" class="btn btn--ghost magnetic">Travaillons ensemble</a>
+    <div class="zonetags" id="zonetags" aria-hidden="true"></div>
+
+    <p class="hint mono" id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer · Clic sur un conteneur : l'ouvrir</p>
+    <div class="tip mono" id="tip" hidden></div>
+
+    <aside class="panel" id="panel" aria-hidden="true" aria-labelledby="p-title">
+      <div class="stripe"></div>
+      <div class="panel__scroll">
+        <div class="panel__top">
+          <span class="kind mono" id="p-kind"></span>
+          <button class="close" id="p-close" aria-label="Fermer le conteneur">Fermer ✕</button>
+        </div>
+        <div class="iso mono" id="p-iso"></div>
+        <h2 id="p-title"></h2>
+        <p class="sub" id="p-sub"></p>
+        <div class="body" id="p-body"></div>
+        <ul class="tags mono" id="p-tags"></ul>
+        <div class="pager mono">
+          <button id="p-prev">← Précédent</button>
+          <span id="p-count"></span>
+          <button id="p-next">Suivant →</button>
+        </div>
+        <svg class="barcode" id="p-barcode" height="38" aria-hidden="true"></svg>
       </div>
-      <div class="scroll mono" aria-hidden="true">scroll <i></i></div>
-    </section>
+    </aside>
 
-    <section id="about" class="section">
-      <p class="label mono">01 — À propos</p>
-      <div class="about">
-        <p class="about__text reveal-words">
-          Développeur passionné par l'IT et les nouvelles technologies, je conçois des applications
-          complètes : interface, API, base de données et déploiement. Mon moteur&nbsp;: trouver des
-          solutions créatives à des problèmes complexes.
+    <section class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+      <div class="stripe"></div>
+      <div class="intro__in">
+        <p class="mono intro__pass">Passe d'accès · Gate-in</p>
+        <h1 id="intro-title">Yann Cotan</h1>
+        <p class="intro__lead">
+          Je développe des applications web de bout en bout : interface, API, base de données et déploiement.
+          Je travaille à Abidjan Terminal, d'où ce portfolio en forme de terminal à conteneurs.
         </p>
-        <ul class="stats">
-          <li><b data-count="5">0</b><span>expériences pro & stages</span></li>
-          <li><b data-count="3">0</b><span>entreprises & structures</span></li>
-          <li><b data-count="2">0</b><span>langues courantes (FR / EN)</span></li>
-        </ul>
+        <p>Chaque conteneur renferme quelque chose : mes outils, mon parcours, mes projets. Pilote la grue avec la souris, clique pour en ouvrir un.</p>
+        <dl class="mono">
+          <div><dt>Fonction</dt><dd>Développeur web fullstack</dd></div>
+          <div><dt>Poste actuel</dt><dd>CDI, Abidjan Terminal</dd></div>
+          <div><dt>Missions</dt><dd>Freelance : disponible</dd></div>
+        </dl>
+        <button class="go" id="go">Entrer dans le terminal →</button>
       </div>
     </section>
 
-    <section id="skills" class="section">
-      <p class="label mono">02 — Stack</p>
-      <h2 class="h2 reveal">Des outils maîtrisés,<br />du navigateur au serveur.</h2>
-      <div class="skills" id="skills-grid"></div>
-    </section>
+    <div class="loader" id="loader"><div class="mono">Chargement du terminal</div><i></i></div>
+  </div>
 
-    <section class="marquee" aria-hidden="true">
-      <div class="marquee__track">
-        <span>React</span><span>Next.js</span><span>Node.js</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span><span>Nginx</span><span>Tailwind</span><span>three.js</span><span>GSAP</span>
-        <span>React</span><span>Next.js</span><span>Node.js</span><span>PostgreSQL</span><span>Redis</span><span>Docker</span><span>Nginx</span><span>Tailwind</span><span>three.js</span><span>GSAP</span>
-      </div>
-    </section>
-
-    <section id="experience" class="section">
-      <p class="label mono">03 — Parcours</p>
-      <h2 class="h2 reveal">Ce que j'ai fait.</h2>
-      <ol class="timeline" id="timeline"></ol>
-    </section>
-
-    <section id="projects" class="section">
-      <p class="label mono">04 — Projets</p>
-      <h2 class="h2 reveal">Réalisations choisies.</h2>
-      <div class="projects" id="projects-grid"></div>
-    </section>
-
-    <section class="section">
-      <p class="label mono">05 — Formation</p>
-      <div class="edu" id="edu"></div>
-    </section>
-
-    <section id="contact" class="section contact">
-      <p class="label mono">06 — Contact</p>
-      <h2 class="contact__title reveal">Un projet en tête&nbsp;?<br /><span class="grad">Parlons-en.</span></h2>
-      <a class="contact__mail magnetic" id="mail" href="#"></a>
-      <div class="contact__links mono" id="links"></div>
-    </section>
-  </main>
-
-  <footer class="footer mono">
-    <span>© <span id="year"></span> Yann Cotan</span>
-    <span>Abidjan, Côte d'Ivoire</span>
-  </footer>
+  <section class="list" id="list" aria-label="Contenu du portfolio en liste" hidden>
+    <div class="list__in">
+      <button class="close" id="list-close">← Retour au terminal 3D</button>
+      <div id="list-body"></div>
+    </div>
+  </section>
 
   <script type="module" src="/src/main.js"></script>
 </body>
