@@ -38,7 +38,7 @@ function renderClassic() {
   }).join('');
   const exp = byZone('parcours').slice().reverse().map((e) => `<li class="c-tl"><p class="mono c-tl__when">${esc(e.period)}</p><h3>${esc(e.title)}</h3><p class="c-tl__org">${esc(e.sub)}</p><p>${esc(e.body.join(' '))}</p></li>`).join('');
   const edu = byZone('formation').map((e) => `<div class="c-card c-edu"><p class="mono">${esc(e.period || e.sub)}</p><h3>${esc(e.title)}</h3><p>${esc(e.period ? e.sub : '')}</p></div>`).join('');
-  const hob = hobbies.map((h) => `<div class="c-card"><h3>${esc(h.label)}</h3><p>${esc(h.plain || h.text)}</p></div>`).join('');
+  const hob = hobbies.map((h) => `<div class="c-card"><h3>${esc(h.label)}</h3><p>${esc(h.plain || h.text)}</p>${h.picks.length ? `<div class="c-chips c-picks">${h.picks.map((x) => `<span>${esc(x)}</span>`).join('')}</div>` : ''}</div>`).join('');
   const photos = PHOTOS.map((p, i) => `<button class="c-photo" data-photo="${i}" aria-label="Agrandir : ${esc(p.caption)}"><img src="${p.src}" alt="${esc(p.caption)}" loading="lazy" /></button>`).join('');
   return `
   <header class="c-head">

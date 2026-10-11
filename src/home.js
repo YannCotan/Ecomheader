@@ -100,8 +100,8 @@ export function createHome() {
 
   // écrans
   const SW = 640, SH = 360;
-  const mkScreen = () => { const [c, g] = cv(SW, SH); const t = tex(c); return { c, g, t }; };
-  const code = mkScreen(), game = mkScreen();
+  const mkScreen = (w = SW, h = SH) => { const [c, g] = cv(w, h); const t = tex(c); return { c, g, t }; };
+  const code = mkScreen(), game = mkScreen(960, 540);
   function monitor(screen, x, rotY, id) {
     const grp = new THREE.Group(); grp.position.set(x, 0, -2.3); grp.rotation.y = rotY;
     add(grp, B(0.18, 0.02, 0.18), dark, 0, 0.8, 0); add(grp, B(0.04, 0.22, 0.04), dark, 0, 0.9, 0);
@@ -282,12 +282,12 @@ export function createHome() {
   hot(trips, 'voyages');
 
   // ---------- lumières de la chambre
-  scene.add(new THREE.HemisphereLight('#8a8ad0', '#3a2440', 1.9));
-  const moonL = new THREE.DirectionalLight('#9ab0ff', 1.3); moonL.position.set(-4, 4, -3); scene.add(moonL);
+  scene.add(new THREE.HemisphereLight('#8a8ad0', '#3a2440', 2.5));
+  const moonL = new THREE.DirectionalLight('#9ab0ff', 1.7); moonL.position.set(-4, 4, -3); scene.add(moonL);
   const L = (c, i, d, x, y, z) => { const l = new THREE.PointLight(c, i, d); l.position.set(x, y, z); scene.add(l); return l; };
   L('#00e5ff', 3.2, 5, 0.3, 1.5, -1.6);
   const pink = L('#ff2fa8', 3.5, 5, -2.4, 1.2, -0.4);
-  L('#ffb878', 8, 10, 0.2, 2.6, 0.2);
+  L('#ffb878', 11, 11, 0.2, 2.6, 0.2);
 
   // ---------- écrans animés
   // Écran de code (écriture automatique, redessiné ~15 fois par seconde) ; l'écran de jeu, lui, est dessiné une seule fois
@@ -321,25 +321,106 @@ export function createHome() {
     g.fillStyle = '#0b2942'; g.fillRect(0, SH - 24, SW, 24); g.fillStyle = '#7fdbca'; g.font = '500 13px "IBM Plex Mono", monospace'; g.fillText('main ●  JavaScript  UTF-8', 12, SH - 8);
     code.t.needsUpdate = true;
   }
-  function drawGame(t) {
-    const g = game.g, hz = 150;
-    const sky = g.createLinearGradient(0, 0, 0, hz); sky.addColorStop(0, '#1a0b3a'); sky.addColorStop(1, '#ff5b14'); g.fillStyle = sky; g.fillRect(0, 0, SW, hz);
-    g.fillStyle = '#ffd27a'; g.beginPath(); g.arc(320, hz - 10, 50, Math.PI, 0); g.fill();
-    g.fillStyle = '#1d0f33'; g.beginPath(); g.moveTo(0, hz); for (let x = 0; x <= SW; x += 40) g.lineTo(x, hz - 20 - ((x * 13) % 40)); g.lineTo(SW, hz); g.fill();
-    for (let y = hz; y < SH; y += 3) {
-      const k = (y - hz) / (SH - hz), z = 1 / (k + 0.04), ph = ((z * 0.5 + t * 6) % 2) < 1;
-      g.fillStyle = ph ? '#13131c' : '#1b1b28'; g.fillRect(0, y, SW, 3);
-      const half = 40 + k * 300; g.fillStyle = ph ? '#262633' : '#2e2e3d'; g.fillRect(320 - half, y, half * 2, 3);
-      g.fillStyle = ph ? '#e5561b' : '#f3efe4'; g.fillRect(320 - half, y, 6 + k * 10, 3); g.fillRect(320 + half - (6 + k * 10), y, 6 + k * 10, 3);
-      if (ph) { g.fillStyle = '#f0b400'; g.fillRect(318, y, 4 + k * 6, 3); }
-    }
-    const cx = 320;
-    g.fillStyle = '#c9382a'; g.fillRect(cx - 46, 290, 92, 30); g.fillStyle = '#16150f'; g.fillRect(cx - 34, 272, 68, 22); g.fillStyle = '#ff2f2f'; g.fillRect(cx - 44, 300, 18, 8); g.fillRect(cx + 26, 300, 18, 8); g.fillStyle = '#0a0a0a'; g.fillRect(cx - 52, 312, 18, 14); g.fillRect(cx + 34, 312, 18, 14);
-    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(14, 12, 150, 56); g.fillStyle = '#f3efe4'; g.font = '700 34px "Barlow Condensed", sans-serif'; g.fillText('212 KM/H', 24, 52);
-    g.font = '500 13px "IBM Plex Mono", monospace'; g.fillStyle = '#f0b400'; g.fillText('LAP 2/3  P1', 24, 28);
+  // Lanceur de jeux (dessiné une seule fois) : illustrations originales stylisées, pas de visuels officiels
+  const GW = 960, GH = 540;
+  function drawLauncher() {
+    const g = game.g;
+    let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const clipped = (x, y, w, h, fn) => { g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip(); g.translate(x, y); fn(w, h); g.restore(); };
+    const poly = (pts, fill) => { g.beginPath(); pts.forEach(([px, py], i) => (i ? g.lineTo(px, py) : g.moveTo(px, py))); g.closePath(); g.fillStyle = fill; g.fill(); };
+    const vgrad = (h, stops) => { const gr = g.createLinearGradient(0, 0, 0, h); stops.forEach(([o, c]) => gr.addColorStop(o, c)); return gr; };
+    const arts = {
+      fortnite(w, h) {
+        g.fillStyle = vgrad(h, [[0, '#2fb0ff'], [0.6, '#9a63ff'], [1, '#ffb0e0']]); g.fillRect(0, 0, w, h);
+        const sun = g.createRadialGradient(w * 0.8, h * 0.25, 2, w * 0.8, h * 0.25, h * 0.3); sun.addColorStop(0, '#fffbd0'); sun.addColorStop(1, 'rgba(255,240,160,0)'); g.fillStyle = sun; g.fillRect(0, 0, w, h);
+        g.fillStyle = 'rgba(255,255,255,.9)';
+        [[0.15, 0.2, 0.09], [0.3, 0.26, 0.07], [0.5, 0.82, 0.1], [0.85, 0.78, 0.08], [0.1, 0.8, 0.07]].forEach(([cx, cy, r]) => { g.beginPath(); g.ellipse(w * cx, h * cy, h * r * 1.6, h * r, 0, 0, 7); g.fill(); });
+        poly([[w * 0.16, h * 0.64], [w * 0.66, h * 0.64], [w * 0.55, h * 0.9], [w * 0.4, h * 0.8], [w * 0.3, h * 0.92]], '#6b4a2e');
+        g.fillStyle = '#4fd65a'; g.beginPath(); g.ellipse(w * 0.41, h * 0.64, w * 0.25, h * 0.06, 0, 0, 7); g.fill();
+        [0.28, 0.4, 0.52].forEach((tx, i) => poly([[w * tx, h * 0.62], [w * (tx + 0.03), h * 0.5 - i * h * 0.02], [w * (tx + 0.06), h * 0.62]], '#1f8f3a'));
+        const cx = w * 0.62, cy = h * 0.36, r = h * 0.2;
+        for (let i = 0; i < 6; i++) { g.beginPath(); g.moveTo(cx, cy); g.arc(cx, cy, r, Math.PI + (i * Math.PI) / 6, Math.PI + ((i + 1) * Math.PI) / 6); g.closePath(); g.fillStyle = i % 2 ? '#ff3f7f' : '#ffd23f'; g.fill(); }
+        g.strokeStyle = '#2a1a4a'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(cx - r, cy); g.lineTo(cx, cy + h * 0.2); g.moveTo(cx + r, cy); g.lineTo(cx, cy + h * 0.2); g.moveTo(cx, cy); g.lineTo(cx, cy + h * 0.2); g.stroke();
+        g.fillStyle = '#2a1a4a'; g.beginPath(); g.arc(cx, cy + h * 0.23, h * 0.03, 0, 7); g.fill(); g.fillRect(cx - h * 0.02, cy + h * 0.25, h * 0.04, h * 0.07);
+        for (let i = 0; i < 40; i++) { g.fillStyle = ['#fff', '#ffd23f', '#ff3f7f', '#3fffe0'][i % 4]; g.fillRect(rnd() * w, rnd() * h, 3, 3); }
+      },
+      apex(w, h) {
+        g.fillStyle = vgrad(h, [[0, '#0d0505'], [0.55, '#3a0d0b'], [1, '#d4401c']]); g.fillRect(0, 0, w, h);
+        g.strokeStyle = 'rgba(255,120,60,.14)'; g.lineWidth = 1; const R = 16;
+        for (let row = 0; row * R * 1.5 < h + R; row++) for (let col = 0; col * R * 1.75 < w + R; col++) { const x = col * R * 1.75 + (row % 2 ? R * 0.87 : 0), y = row * R * 1.5; g.beginPath(); for (let k = 0; k < 6; k++) { const a = (Math.PI / 3) * k + Math.PI / 6; g.lineTo(x + R * Math.cos(a), y + R * Math.sin(a)); } g.closePath(); g.stroke(); }
+        g.strokeStyle = '#ff4a1c'; g.lineWidth = Math.max(3, h * 0.025); g.beginPath(); g.moveTo(w * 0.5, h * 0.06); g.lineTo(w * 0.78, h * 0.62); g.lineTo(w * 0.22, h * 0.62); g.closePath(); g.stroke();
+        g.fillStyle = '#080303'; g.beginPath(); g.ellipse(w * 0.5, h * 0.4, h * 0.11, h * 0.13, 0, 0, 7); g.fill();
+        poly([[w * 0.3, h], [w * 0.34, h * 0.62], [w * 0.5, h * 0.54], [w * 0.66, h * 0.62], [w * 0.7, h]], '#080303');
+        g.strokeStyle = '#ff7a3a'; g.lineWidth = 2; g.beginPath(); g.ellipse(w * 0.5, h * 0.4, h * 0.11, h * 0.13, 0, -2.2, -0.6); g.stroke(); g.beginPath(); g.moveTo(w * 0.34, h * 0.62); g.lineTo(w * 0.5, h * 0.54); g.lineTo(w * 0.66, h * 0.62); g.stroke();
+        g.fillStyle = '#ff4a1c'; g.fillRect(w * 0.44, h * 0.38, w * 0.12, h * 0.025);
+      },
+      crimson(w, h) {
+        g.fillStyle = vgrad(h, [[0, '#14040e'], [0.5, '#7a1030'], [1, '#ff7a45']]); g.fillRect(0, 0, w, h);
+        const sun = g.createRadialGradient(w * 0.5, h * 0.55, 2, w * 0.5, h * 0.55, h * 0.5); sun.addColorStop(0, 'rgba(255,90,60,.9)'); sun.addColorStop(0.45, 'rgba(255,60,60,.35)'); sun.addColorStop(1, 'rgba(255,60,60,0)'); g.fillStyle = sun; g.fillRect(0, 0, w, h);
+        g.fillStyle = '#ff4638'; g.beginPath(); g.arc(w * 0.5, h * 0.55, h * 0.24, 0, 7); g.fill();
+        [['#4a0a1c', 0.62, 0.1], ['#32061a', 0.72, 0.14], ['#1c030f', 0.84, 0.12]].forEach(([c, y, a], i) => { g.fillStyle = c; g.beginPath(); g.moveTo(0, h); for (let x = 0; x <= w; x += 6) g.lineTo(x, h * y + Math.sin(x / (w * 0.18) + i * 2) * h * a * 0.6); g.lineTo(w, h); g.closePath(); g.fill(); });
+        const fx = w * 0.7, fy = h * 0.7;
+        poly([[fx - h * 0.07, fy + h * 0.2], [fx - h * 0.02, fy], [fx + h * 0.02, fy], [fx + h * 0.08, fy + h * 0.2]], '#0a0208');
+        g.fillStyle = '#0a0208'; g.beginPath(); g.arc(fx, fy - h * 0.03, h * 0.035, 0, 7); g.fill();
+        g.strokeStyle = '#e8d8c8'; g.lineWidth = 2; g.beginPath(); g.moveTo(fx + h * 0.05, fy + h * 0.02); g.lineTo(fx + h * 0.2, fy - h * 0.18); g.stroke();
+        g.strokeStyle = '#0a0208'; g.lineWidth = 2; [[0.2, 0.2], [0.3, 0.14], [0.36, 0.24]].forEach(([bx, by]) => { g.beginPath(); g.moveTo(w * bx - 6, h * by); g.lineTo(w * bx, h * by + 4); g.lineTo(w * bx + 6, h * by); g.stroke(); });
+      },
+      ghost(w, h) {
+        g.fillStyle = vgrad(h, [[0, '#f0eae2'], [0.55, '#cdbfb2'], [1, '#6e6258']]); g.fillRect(0, 0, w, h);
+        g.fillStyle = '#c8352b'; g.beginPath(); g.arc(w * 0.72, h * 0.34, h * 0.17, 0, 7); g.fill();
+        poly([[0, h * 0.62], [w * 0.2, h * 0.38], [w * 0.38, h * 0.55], [w * 0.55, h * 0.4], [w * 0.8, h * 0.6], [w, h * 0.5], [w, h], [0, h]], 'rgba(120,110,104,.55)');
+        g.fillStyle = 'rgba(240,234,226,.55)'; g.fillRect(0, h * 0.5, w, h * 0.12);
+        for (let i = 0; i < 90; i++) { const x = rnd() * w, hh = h * (0.18 + rnd() * 0.3); g.strokeStyle = i % 3 ? '#d7b24f' : '#3e301c'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, h); g.quadraticCurveTo(x + (rnd() - 0.4) * 14, h - hh * 0.6, x + (rnd() - 0.3) * 22, h - hh); g.stroke(); }
+        const sx = w * 0.32, sy = h * 0.62;
+        g.fillStyle = '#0c0a0a'; poly([[sx - h * 0.09, sy - h * 0.15], [sx, sy - h * 0.3], [sx + h * 0.09, sy - h * 0.15]], '#0c0a0a');
+        poly([[sx - h * 0.07, sy + h * 0.45], [sx - h * 0.04, sy - h * 0.14], [sx + h * 0.04, sy - h * 0.14], [sx + h * 0.08, sy + h * 0.45]], '#0c0a0a');
+        g.strokeStyle = '#f3efe4'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(sx + h * 0.05, sy + h * 0.1); g.lineTo(sx + h * 0.28, sy - h * 0.12); g.stroke();
+        for (let i = 0; i < 26; i++) { g.fillStyle = 'rgba(200,53,43,.85)'; g.beginPath(); g.ellipse(rnd() * w, rnd() * h, 3.5, 1.8, rnd() * 3, 0, 7); g.fill(); }
+      },
+    };
+    g.fillStyle = '#101014'; g.fillRect(0, 0, GW, GH);
+    // barre latérale
+    g.fillStyle = '#17171c'; g.fillRect(0, 0, 170, GH);
+    g.fillStyle = '#e5561b'; g.beginPath(); g.arc(38, 44, 20, 0, 7); g.fill();
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '700 24px "Barlow Condensed", sans-serif'; g.fillText('Y', 38, 45);
+    g.textAlign = 'left'; g.font = '700 19px "Barlow Condensed", sans-serif'; g.fillText('YANKO', 68, 37);
+    g.fillStyle = '#3fd17a'; g.beginPath(); g.arc(72, 56, 4, 0, 7); g.fill(); g.fillStyle = '#9a9aa5'; g.font = '500 12px "IBM Plex Mono", monospace'; g.fillText('En ligne', 82, 57);
+    ['Boutique', 'Bibliothèque', 'Amis', 'Téléchargements'].forEach((t, i) => {
+      const y = 112 + i * 46;
+      if (i === 1) { g.fillStyle = '#25252d'; g.fillRect(0, y - 20, 170, 40); g.fillStyle = '#0078f2'; g.fillRect(0, y - 20, 4, 40); }
+      g.fillStyle = i === 1 ? '#fff' : '#a2a2ae'; g.font = '600 17px "Barlow Condensed", sans-serif'; g.fillText(t.toUpperCase(), 24, y + 1);
+    });
+    g.fillStyle = '#5b5b66'; g.font = '500 11px "IBM Plex Mono", monospace'; g.fillText('Lanceur v1.0', 24, GH - 22);
+    // barre du haut
+    g.fillStyle = '#14141a'; g.fillRect(170, 0, GW - 170, 58);
+    g.fillStyle = '#26262c'; g.beginPath(); g.roundRect(192, 14, 310, 32, 16); g.fill();
+    g.fillStyle = '#8a8a96'; g.font = '500 14px "IBM Plex Mono", monospace'; g.fillText('Rechercher un jeu', 214, 31);
+    g.fillStyle = '#c7c7d1'; g.font = '600 16px "Barlow Condensed", sans-serif'; ['DÉCOUVRIR', 'BIBLIOTHÈQUE', 'ACTUALITÉS'].forEach((t, i) => g.fillText(t, 580 + i * 120, 31));
+    // grande bannière : Ghost of Tsushima
+    const bx = 192, by = 78, bw = GW - 192 - 20, bh = 232;
+    clipped(bx, by, bw, bh, (w, h) => {
+      arts.ghost(w, h);
+      const ov = g.createLinearGradient(0, 0, w * 0.62, 0); ov.addColorStop(0, 'rgba(10,10,14,.92)'); ov.addColorStop(1, 'rgba(10,10,14,0)'); g.fillStyle = ov; g.fillRect(0, 0, w, h);
+      g.fillStyle = '#0078f2'; g.fillRect(26, 28, 108, 22); g.fillStyle = '#fff'; g.font = '600 13px "IBM Plex Mono", monospace'; g.textBaseline = 'middle'; g.fillText('À LA UNE', 36, 40);
+      g.font = '700 54px "Barlow Condensed", sans-serif'; g.textBaseline = 'alphabetic'; g.fillText('GHOST OF', 26, 112); g.fillText('TSUSHIMA', 26, 160);
+      g.fillStyle = '#c7c7d1'; g.font = '500 14px "IBM Plex Mono", monospace'; g.fillText('Action-aventure en monde ouvert', 26, 188);
+      g.fillStyle = '#0078f2'; g.beginPath(); g.roundRect(26, 198, 120, 26, 4); g.fill(); g.fillStyle = '#fff'; g.font = '700 17px "Barlow Condensed", sans-serif'; g.textBaseline = 'middle'; g.fillText('JOUER', 62, 212);
+    });
+    // rangée de jeux
+    const cards = [['fortnite', 'FORTNITE', 'Battle royale'], ['apex', 'APEX LEGENDS', 'Hero shooter'], ['crimson', 'CRIMSON DESERT', 'Action-aventure'], ['ghost', 'GHOST OF TSUSHIMA', 'Action-aventure']];
+    const cw = (bw - 3 * 14) / 4, cy = 326, ch = 190;
+    cards.forEach(([k, name, genre], i) => {
+      const x = bx + i * (cw + 14);
+      g.fillStyle = '#1d1d24'; g.beginPath(); g.roundRect(x, cy, cw, ch, 6); g.fill();
+      clipped(x, cy, cw, 112, (w, h) => arts[k](w, h));
+      g.fillStyle = '#fff'; g.textBaseline = 'alphabetic'; g.font = '700 19px "Barlow Condensed", sans-serif'; g.fillText(name, x + 12, cy + 138);
+      g.fillStyle = '#9a9aa5'; g.font = '500 12px "IBM Plex Mono", monospace'; g.fillText(genre, x + 12, cy + 158);
+      g.fillStyle = '#3fd17a'; g.beginPath(); g.arc(x + 17, cy + 176, 3.5, 0, 7); g.fill(); g.fillStyle = '#c7c7d1'; g.fillText('Installé', x + 26, cy + 180);
+      if (k === 'ghost') { g.strokeStyle = '#0078f2'; g.lineWidth = 2; g.beginPath(); g.roundRect(x + 1, cy + 1, cw - 2, ch - 2, 6); g.stroke(); }
+    });
     game.t.needsUpdate = true;
   }
-  drawCode(0); drawGame(0.8);
+  drawCode(0); drawLauncher();
   let frame = 0;
 
   function update(dt, t, extra = {}) {
