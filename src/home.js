@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import plage from './photos/plage.jpg?inline';
 import abidjan from './photos/abidjan.jpg?inline';
 import soiree from './photos/soiree.jpg?inline';
+import cadillac from './photos/cadillac.jpg?inline';
 
 // Chambre de gamer « à la maison », de nuit. Chaque objet cliquable ouvre un hobby.
 export const PHOTOS = [
@@ -19,6 +20,8 @@ export const HOME_VIEWS = {
   voitures: { pos: [-0.9, 1.6, 1.9], target: [-3.0, 1.5, 0.1] },
   voyages: { pos: [0.9, 1.65, 1.1], target: [3.1, 1.5, -0.1] },
 };
+
+const HOVER = new THREE.Color('#ff8a3a');
 
 export function createHome() {
   const scene = new THREE.Scene();
@@ -41,7 +44,7 @@ export function createHome() {
       pickables.push(m);
       if (m.material.emissiveIntensity > 1.5) return; // matériaux RVB animés : pas de surbrillance
       m.material = m.material.clone();
-      hotMats.push({ mat: m.material, id, base: m.material.color.clone() });
+      hotMats.push({ mat: m.material, id, base: m.material.color.clone(), em: m.material.emissiveIntensity || 0, emBase: m.material.emissive ? m.material.emissive.clone() : null });
     });
   };
 
@@ -246,18 +249,12 @@ export function createHome() {
     add(g, B(0.01, 0.012, 0.05), new THREE.MeshStandardMaterial({ color: '#fff', emissive: '#fff4c0', emissiveIntensity: 2 }), 0.1, 0.035, 0);
   };
   miniCar('#e5561b', -1.65); miniCar('#2e5b86', -1.3); miniCar('#f0b400', -0.95); miniCar('#c9382a', -0.6);
-  { const [c, g] = cv(480, 320);
-    const sky = g.createLinearGradient(0, 0, 0, 320); sky.addColorStop(0, '#2a1048'); sky.addColorStop(0.55, '#ff5b14'); sky.addColorStop(1, '#f0b400');
-    g.fillStyle = sky; g.fillRect(0, 0, 480, 320);
-    g.fillStyle = '#ffe9b0'; g.beginPath(); g.arc(340, 150, 62, 0, 7); g.fill();
-    g.fillStyle = '#16102a'; g.fillRect(0, 232, 480, 88);
-    for (let i = 0; i < 12; i++) { g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(20 + i * 8, 160 + i * 5, 90 - i * 4, 2); }
-    g.fillStyle = '#0b0b12'; g.beginPath(); g.moveTo(110, 236); g.bezierCurveTo(120, 205, 170, 196, 205, 188); g.bezierCurveTo(235, 160, 285, 160, 310, 188); g.bezierCurveTo(350, 192, 392, 205, 396, 236); g.closePath(); g.fill();
-    g.fillStyle = '#16102a'; g.beginPath(); g.arc(165, 238, 24, 0, 7); g.arc(350, 238, 24, 0, 7); g.fill(); g.fillStyle = '#0b0b12'; g.beginPath(); g.arc(165, 238, 16, 0, 7); g.arc(350, 238, 16, 0, 7); g.fill();
-    g.fillStyle = '#f3efe4'; g.font = '700 38px "Barlow Condensed", sans-serif'; g.textAlign = 'left'; g.fillText('NIGHT DRIVE', 24, 292);
-    const poster = add(cars, new THREE.PlaneGeometry(1.2, 0.8), new THREE.MeshStandardMaterial({ map: tex(c), roughness: 0.8, emissive: '#ffffff', emissiveMap: tex(c), emissiveIntensity: 0.25 }), -3.19, 1.7, 0.5);
+  { // affiche : Cadillac CT5 (photo)
+    const pw = 1.42, ph = pw * (594 / 1100);
+    const t = new THREE.TextureLoader().load(cadillac); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    const poster = add(cars, new THREE.PlaneGeometry(pw, ph), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, emissive: '#ffffff', emissiveMap: t, emissiveIntensity: 1.0 }), -3.19, 1.7, 0.5);
     poster.rotation.y = Math.PI / 2;
-    add(cars, B(0.03, 0.86, 1.26), S('#0d0d14'), -3.205, 1.7, 0.5);
+    add(cars, B(0.03, ph + 0.07, pw + 0.07), S('#0d0d14'), -3.205, 1.7, 0.5);
   }
   hot(cars, 'voitures');
 
@@ -442,7 +439,7 @@ export function createHome() {
     for (const hm of hotMats) {
       const target = extra.hover === hm.id ? 1 : 0;
       hm.amt = (hm.amt || 0) + (target - (hm.amt || 0)) * 0.2;
-      if (hm.mat.emissive && !hm.mat.isMeshBasicMaterial) { hm.mat.emissive.set('#ff8a3a'); hm.mat.emissiveIntensity = hm.amt * 0.18; }
+      if (hm.mat.emissive && !hm.mat.isMeshBasicMaterial) { hm.mat.emissive.copy(hm.emBase).lerp(HOVER, hm.amt); hm.mat.emissiveIntensity = hm.em + hm.amt * 0.18; }
       else hm.mat.color.copy(hm.base).multiplyScalar(1 + hm.amt * 0.45);
     }
   }

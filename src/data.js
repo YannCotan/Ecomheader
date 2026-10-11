@@ -25,7 +25,7 @@ export const hobbies = [
   { id: 'jeux', label: 'Jeux vidéo', text: 'Je suis un peu gamer. J\'aime jouer pendant mon temps libre. Sur l\'écran, mon lanceur de jeux.', picks: ['Fortnite', 'Apex Legends', 'Crimson Desert', 'Ghost of Tsushima'] },
   { id: 'manga', label: 'Manga', text: 'J\'aime regarder des mangas.', picks: [], soon: true },
   { id: 'musique', label: 'Musique', plain: 'J\'aime écouter de la musique.', text: 'J\'aime écouter de la musique. Clique sur la platine, ou sur le bouton ci-dessous, pour lancer une ambiance lo-fi composée pour ce site.', picks: [], soon: true, audio: true },
-  { id: 'voitures', label: 'Voitures', text: 'J\'aime beaucoup les voitures.', picks: [], soon: true },
+  { id: 'voitures', label: 'Voitures', text: 'J\'aime beaucoup les voitures.', picks: ['Cadillac CT5'] },
   { id: 'voyages', label: 'Voyages', plain: 'Je voyage souvent. Quelques photos de ces moments juste en dessous.', text: 'Je voyage souvent. Quelques photos de ces moments : clique sur un cadre pour l\'agrandir.', picks: [], gallery: true },
 ];
 
