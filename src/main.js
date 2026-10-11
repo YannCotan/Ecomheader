@@ -295,7 +295,7 @@ $('#p-close').addEventListener('click', () => yard?.close());
 addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!lb.hidden) closePhoto(); else if (!listEl.hidden) closeList(); else if (homeOpen) closeHomePanel(); else if (inHome) travel('yard'); else yard?.close();
-  } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+  } else if ((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && !document.body.classList.contains('pre-entry')) {
     const d = e.key === 'ArrowRight' ? 1 : -1;
     if (homeOpen) openHomeTab(homeTab + d); else near(d);
   }
@@ -324,7 +324,11 @@ $('#cta').addEventListener('click', () => (yard ? yard.select('contact') : openL
 
 /* ---------- entrée et chargement ---------- */
 const introEl = $('#intro');
+const locked = [$('.nav'), $('#zonetags'), $('#cta')];
+locked.forEach((el) => (el.inert = true)); // navigation verrouillée tant qu'on n'est pas entré dans le terminal
+function unlock() { locked.forEach((el) => (el.inert = false)); document.body.classList.remove('pre-entry'); }
 function enter(thenContact = false) {
+  unlock();
   gsap.to(introEl, { y: 40, opacity: 0, duration: 0.5, ease: 'power2.in', onComplete: () => introEl.classList.add('gone') });
   yard?.enter();
   document.body.classList.add('entered');
@@ -341,7 +345,7 @@ fontsReady.then(() => {
   init();
   const loader = $('#loader');
   gsap.to(loader, { opacity: 0, duration: 0.5, onComplete: () => loader.remove() });
-  if (!yard) { introEl.classList.add('gone'); document.body.classList.add('no-webgl'); openList(); }
+  if (!yard) { unlock(); introEl.classList.add('gone'); document.body.classList.add('no-webgl'); openList(); }
   else gsap.from(introEl.querySelector('.intro__in'), { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 });
 });
 

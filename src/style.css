@@ -38,6 +38,13 @@ a { color: inherit; }
   background: repeating-linear-gradient(-45deg, var(--hazard) 0 12px, var(--ink) 12px 24px);
 }
 
+/* avant l'entrée dans le terminal : fond flou blanc, navigation inaccessible */
+.veil { position: fixed; inset: 0; background: rgba(255,255,255,.62); backdrop-filter: blur(18px) saturate(.85); -webkit-backdrop-filter: blur(18px) saturate(.85); opacity: 0; pointer-events: none; transition: opacity .9s ease; }
+.pre-entry .veil { opacity: 1; pointer-events: auto; }
+.nav, .hint { transition: opacity .6s ease, filter .6s ease; }
+.pre-entry .nav { opacity: .38; filter: grayscale(1); pointer-events: none; }
+.pre-entry .hint { opacity: 0; }
+
 /* plaque d'identité */
 .plate {
   position: absolute; top: var(--gap); left: var(--gap);
