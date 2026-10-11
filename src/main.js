@@ -12,6 +12,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (reduced) gsap.globalTimeline.timeScale(8);
 
+document.body.classList.add('pre-entry'); // état de départ (aussi posé par le script, au cas où la balise <body> est remplacée par un hôte)
 const zoneKeys = Object.keys(zoneMeta);
 const tagHtml = (t) => `${iconSvg(t, 15)}<span>${esc(t)}</span>`;
 $('#intro-photo').src = portrait;
