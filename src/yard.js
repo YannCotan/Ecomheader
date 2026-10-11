@@ -381,7 +381,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   const lofi = createLofi();
   let homeHover = null, portalHover = false;
   const YARD_CTL = { minDistance: 7, maxDistance: 95, minPolarAngle: 0.15, maxPolarAngle: 1.38, minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity };
-  const HOME_CTL = { minDistance: 0.6, maxDistance: 7, minPolarAngle: 0.45, maxPolarAngle: 1.8, minAzimuthAngle: -1.15, maxAzimuthAngle: 1.15 };
+  const HOME_CTL = { minDistance: 0.6, maxDistance: 8, minPolarAngle: 0.35, maxPolarAngle: 1.6, minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity };
   function setWorld(w) {
     if (w === world) return;
     gsap.killTweensOf(camera.position); gsap.killTweensOf(controls.target); arcTween?.kill();
@@ -502,14 +502,9 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
 
     elapsed += dt;
     swTex.rotation -= dt * 0.7; ring2.rotation.z += dt * 0.9; ring1.material.emissiveIntensity = 1.4 + Math.sin(elapsed * 3) * 0.4;
-    if (world === 'home') home.update(dt, elapsed, { hover: homeHover, music: lofi.playing, pulse: lofi.pulse() });
+    if (world === 'home') home.update(dt, elapsed, { hover: homeHover, music: lofi.playing, pulse: lofi.pulse(), cam: camera.position });
     controls.update();
     const t = controls.target;
-    if (world === 'home') {
-      // la caméra reste dans la pièce (3 murs, sol) : jamais derrière un mur
-      const c = camera.position;
-      c.x = THREE.MathUtils.clamp(c.x, -2.95, 2.95); c.y = THREE.MathUtils.clamp(c.y, 0.25, 2.7); c.z = THREE.MathUtils.clamp(c.z, -2.35, 5);
-    }
     if (world === 'home') { t.x = THREE.MathUtils.clamp(t.x, -3.2, 3.2); t.y = THREE.MathUtils.clamp(t.y, 0.3, 2.6); t.z = THREE.MathUtils.clamp(t.z, -2.6, 2.2); }
     else { t.x = THREE.MathUtils.clamp(t.x, -46, 46); t.y = THREE.MathUtils.clamp(t.y, 0, 14); t.z = THREE.MathUtils.clamp(t.z, -22, 34); }
 

@@ -53,10 +53,10 @@ export function createHome() {
   const floor = add(scene, new THREE.PlaneGeometry(6.4, 5.2), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6 }), 0, 0, -0.1);
   floor.rotation.x = -Math.PI / 2;
   const wallM = S('#1a1a26', 0.95);
-  add(scene, B(6.4, 3, 0.1), wallM, 0, 1.5, -2.65);
-  add(scene, B(0.1, 3, 5.2), wallM, -3.25, 1.5, -0.1);
-  add(scene, B(0.1, 3, 5.2), wallM, 3.25, 1.5, -0.1);
-  add(scene, B(6.4, 0.08, 0.1), S('#0d0d14'), 0, 0.04, -2.58);
+  // murs : chacun devient invisible quand la caméra passe de l'autre côté (vue « maquette »)
+  const wBack = [add(scene, B(6.4, 3, 0.1), wallM, 0, 1.5, -2.65), add(scene, B(6.4, 0.08, 0.1), S('#0d0d14'), 0, 0.04, -2.58)];
+  const wLeft = [add(scene, B(0.1, 3, 5.2), wallM, -3.25, 1.5, -0.1)];
+  const wRight = [add(scene, B(0.1, 3, 5.2), wallM, 3.25, 1.5, -0.1)];
   // tapis rond
   const rug = add(scene, new THREE.CircleGeometry(1.5, 48), S('#3a2a5a', 1), 0.3, 0.012, -0.6); rug.rotation.x = -Math.PI / 2;
   const ring = add(scene, new THREE.RingGeometry(1.35, 1.45, 48), S('#e5561b', 1), 0.3, 0.014, -0.6); ring.rotation.x = -Math.PI / 2;
@@ -424,6 +424,12 @@ export function createHome() {
   let frame = 0;
 
   function update(dt, t, extra = {}) {
+    if (extra.cam) {
+      const c = extra.cam;
+      wBack.forEach((m) => (m.visible = c.z > -2.65));
+      wLeft.forEach((m) => (m.visible = c.x > -3.25));
+      wRight.forEach((m) => (m.visible = c.x < 3.25));
+    }
     if (++frame % 4 === 0) drawCode(t);
     yanko.forEach((m, i) => m.color.setHSL((t * 0.18 + i * 0.16) % 1, 1, 0.62));
     const h = (t * 0.12) % 1;
