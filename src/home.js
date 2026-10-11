@@ -77,14 +77,6 @@ export function createHome() {
     add(scene, B(0.06, 1.36, 0.08), fm, -2.9, 1.85, -2.58); add(scene, B(0.06, 1.36, 0.08), fm, -1.1, 1.85, -2.58); add(scene, B(0.04, 1.3, 0.06), fm, -2.0, 1.85, -2.57);
   }
 
-  // ---------- néon au mur
-  { const [c, g] = cv(640, 200);
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '700 120px "Barlow Condensed", sans-serif';
-    g.shadowColor = '#ff2fa8'; g.shadowBlur = 40; g.fillStyle = '#ffd6ef'; g.fillText('PRESS START', 320, 105);
-    g.shadowBlur = 12; g.fillText('PRESS START', 320, 105);
-    add(scene, new THREE.PlaneGeometry(1.9, 0.6), new THREE.MeshBasicMaterial({ map: tex(c), transparent: true }), 0.5, 2.5, -2.58);
-  }
-
   // ---------- enseigne YANKO : néon RVB, une teinte par lettre qui défile
   const yanko = [];
   'YANKO'.split('').forEach((ch, i) => {
@@ -93,7 +85,7 @@ export function createHome() {
     g.shadowColor = '#fff'; g.shadowBlur = 36; g.fillStyle = '#fff'; g.fillText(ch, 64, 100);
     g.shadowBlur = 10; g.fillText(ch, 64, 100);
     const m = new THREE.MeshBasicMaterial({ map: tex(c), transparent: true, depthWrite: false, toneMapped: false });
-    add(scene, new THREE.PlaneGeometry(0.27, 0.405), m, 1.72 + i * 0.28, 2.2, -2.58);
+    add(scene, new THREE.PlaneGeometry(0.36, 0.54), m, 0.5 + (i - 2) * 0.38, 2.42, -2.58);
     yanko.push(m);
   });
 
