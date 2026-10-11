@@ -30,7 +30,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     return null;
   }
   const small = () => innerWidth < 760;
-  renderer.setPixelRatio(Math.min(devicePixelRatio, small() ? 1.5 : 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, small() ? 1.25 : 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -56,7 +56,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   sun.position.set(38, 60, 30);
   sun.castShadow = true;
   const sh = sun.shadow;
-  sh.mapSize.set(small() ? 1024 : 2048, small() ? 1024 : 2048);
+  sh.mapSize.set(small() ? 1024 : 1536, small() ? 1024 : 1536);
   Object.assign(sh.camera, { left: -62, right: 62, top: 50, bottom: -50, near: 5, far: 160 });
   sh.bias = -0.0004; sh.normalBias = 0.06;
   scene.add(sun);
@@ -116,13 +116,15 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
 
     let side, endDoor, endBlank;
     if (item) {
-      side = sideTexture({ color: col, ink, label: item.title, code: iso.text, sizeCode, w: size === 40 ? 1024 : 768, h: size === 40 ? 230 : 330, ribStep: size === 40 ? 8 : 10, office: item.office, seed });
+      side = sideTexture({ color: col, ink, label: item.title, code: iso.text, sizeCode, w: size === 40 ? 896 : 640, h: size === 40 ? 196 : 275, ribStep: size === 40 ? 7 : 8, office: item.office, seed });
       endDoor = endTexture({ color: col, ink, code: iso.text, door: true, seed });
-      endBlank = endTexture({ color: col, ink, code: '', door: false, seed: seed + 1 });
+      const bk = 'b' + col + ink;
+      if (!endCache.has(bk)) endCache.set(bk, endTexture({ color: col, ink, code: '', door: false, seed: seed + 1 }));
+      endBlank = endCache.get(bk);
     } else {
       const k = col + size;
       if (!sideCache.has(k)) {
-        sideCache.set(k, sideTexture({ color: col, ink, label: '', code: iso.text, sizeCode, w: size === 40 ? 1024 : 768, h: size === 40 ? 230 : 330, seed }));
+        sideCache.set(k, sideTexture({ color: col, ink, label: '', code: iso.text, sizeCode, w: size === 40 ? 896 : 640, h: size === 40 ? 196 : 275, seed }));
         endCache.set(k, [endTexture({ color: col, ink, code: iso.text, door: true, seed }), endTexture({ color: col, ink, door: false, seed: seed + 1 })]);
       }
       side = sideCache.get(k); [endDoor, endBlank] = endCache.get(k);
@@ -245,7 +247,6 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   for (const sx of [-1.6, 1.6]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, 0.8), new THREE.MeshStandardMaterial({ color: '#2b2b27', roughness: 0.7 })); leg.position.set(sx, 0.6, 0); leg.castShadow = true; portal.add(leg); }
   const plinth = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.2, 1.4), new THREE.MeshStandardMaterial({ color: '#f0b400', roughness: 0.8 })); plinth.position.y = 0.1; portal.add(plinth);
   const portalHit = disc; portalHit.userData.portal = true;
-  const portalLight = new THREE.PointLight('#ff7a3a', 6, 14); portalLight.position.set(0, 3, 2); portal.add(portalLight);
 
   // ---------- portique (RMG) : suit la souris, saisit les conteneurs
   const yellowM = new THREE.MeshStandardMaterial({ color: '#f0b400', roughness: 0.6, metalness: 0.2 });
@@ -376,7 +377,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
 
 
   // ---------- monde « chez moi » : chambre de gamer (autre scène, même rendu)
-  const home = createHome();
+  let home = null; // créée au premier voyage : économise mémoire et temps de chargement
   const lofi = createLofi();
   let homeHover = null, portalHover = false;
   const YARD_CTL = { minDistance: 7, maxDistance: 95, minPolarAngle: 0.15, maxPolarAngle: 1.38, minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity };
@@ -387,6 +388,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     if (w === 'home') {
       if (held) { const u = held.userData; held.position.set(u.baseX, u.baseY, u.baseZ); held = null; heldItem = null; }
       if (selected) { selected = null; onSelect(null); }
+      home = home || createHome();
       world = 'home';
       Object.assign(controls, HOME_CTL);
       camera.near = 0.05; camera.fov = 50; camera.updateProjectionMatrix();
@@ -436,7 +438,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     }
     down = null; dragging = false; canvas.style.cursor = hovered ? 'pointer' : 'grab';
   });
-  canvas.addEventListener('pointerleave', () => { hovered = null; dirty = false; onHover(null, 0, 0); });
+  canvas.addEventListener('pointerleave', () => { hovered = null; homeHover = null; portalHover = false; dirty = false; onHover(null, 0, 0); });
   canvas.style.cursor = 'grab';
 
   // ---------- étiquettes de zone
@@ -490,14 +492,16 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     for (const r of ropes) { r.position.set(r.userData.ox, (topY + botY) / 2, st.tz + r.userData.oz); r.scale.y = Math.max(0.01, topY - botY); }
     if (held) held.position.set(st.gx, st.sy - 0.23 - H / 2, st.tz);
 
-    for (const m of pickables) {
-      const t = m === hovered || m === held ? 0.32 : 0;
-      m.userData.hover += (t - m.userData.hover) * 0.22;
-      for (const mat of m.userData.mats) { mat.emissive.set('#ff5b14'); mat.emissiveIntensity = m.userData.hover; }
+    if (world === 'yard') for (const m of pickables) {
+      const t = m === hovered || m === held ? 0.32 : 0, u = m.userData;
+      if (u.hover === 0 && t === 0) continue;
+      u.hover += (t - u.hover) * 0.22;
+      if (u.hover < 0.003 && t === 0) u.hover = 0;
+      for (const mat of u.mats) { mat.emissive.set('#ff5b14'); mat.emissiveIntensity = u.hover; }
     }
 
     elapsed += dt;
-    swTex.rotation -= dt * 0.7; ring2.rotation.z += dt * 0.9; ring1.material.emissiveIntensity = 1.4 + Math.sin(elapsed * 3) * 0.4; portalLight.intensity = 5 + Math.sin(elapsed * 2.2) * 1.5;
+    swTex.rotation -= dt * 0.7; ring2.rotation.z += dt * 0.9; ring1.material.emissiveIntensity = 1.4 + Math.sin(elapsed * 3) * 0.4;
     if (world === 'home') home.update(dt, elapsed, { hover: homeHover, music: lofi.playing, pulse: lofi.pulse() });
     controls.update();
     const t = controls.target;

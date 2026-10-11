@@ -51,7 +51,7 @@ function renderClassic() {
         <p class="c-badge mono"><i></i> Disponible en freelance</p>
         <h1>Développeur web <em>fullstack</em> à Abidjan.</h1>
         <p class="c-lead">${esc(about.line)} Je construis des applications de bout en bout : interface, API, base de données et déploiement.</p>
-        <div class="c-cta"><a class="c-btn" href="#c-projets">Voir mes projets</a><a class="c-btn c-btn--ghost" href="#c-contact">Me contacter</a>${github}</div>
+        <div class="c-cta"><a class="c-btn" href="#c-projets">Voir mes projets</a><a class="c-btn c-btn--ghost" href="#c-contact">Me contacter</a><a class="c-btn c-btn--ghost" href="${esc(profile.cv)}" download="CV-Yann-Cotan.pdf" target="_blank" rel="noopener">Mon CV ↓</a>${github}</div>
         <dl class="c-facts mono"><div><dt>Poste actuel</dt><dd>CDI, Abidjan Terminal</dd></div><div><dt>Âge</dt><dd>${about.age} ans</dd></div><div><dt>Langues</dt><dd>Français, anglais</dd></div></dl>
       </div>
       <figure class="c-hero__fig"><img src="${portrait}" alt="Yann Cotan" width="420" height="420" /><figcaption class="mono">YCTU 305438 3 · 22G1</figcaption></figure>
@@ -76,19 +76,24 @@ function renderClassic() {
         <p>Missions freelance, collaborations, questions : écris-moi, je réponds.</p>
         <div class="c-contact__row"><a class="c-mail" href="mailto:${mail}">${mail}</a><button class="copy mono" data-copy="${mail}">Copier</button></div>
         <p class="mono c-contact__line">${esc(profile.phone)} · Abidjan, Côte d'Ivoire</p>
-        <div class="c-cta">${profile.github ? `<a class="c-btn c-btn--light" href="${esc(profile.github)}" target="_blank" rel="noopener">GitHub ↗</a>` : ''}${profile.linkedin ? `<a class="c-btn c-btn--light" href="${esc(profile.linkedin)}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}</div>
+        <div class="c-cta"><a class="c-btn c-btn--light" href="${esc(profile.cv)}" download="CV-Yann-Cotan.pdf" target="_blank" rel="noopener">Télécharger mon CV ↓</a>${profile.github ? `<a class="c-btn c-btn--light" href="${esc(profile.github)}" target="_blank" rel="noopener">GitHub ↗</a>` : ''}${profile.linkedin ? `<a class="c-btn c-btn--light" href="${esc(profile.linkedin)}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}</div>
       </div>
     </section>
   </main>
   <footer class="c-foot mono"><span>© ${new Date().getFullYear()} Yann Cotan</span><span>Abidjan, Côte d'Ivoire</span></footer>`;
 }
-$('#list-body').innerHTML = renderClassic();
+let classicReady = false;
+function ensureClassic() {
+  if (classicReady) return;
+  classicReady = true;
+  $('#list-body').innerHTML = renderClassic();
+  $('#list-close').addEventListener('click', closeList);
+}
 $('#list-body').addEventListener('click', (e) => { const b = e.target.closest('[data-photo]'); if (b) openPhoto(+b.dataset.photo); });
 
 const listEl = $('#list');
-const openList = () => { listEl.hidden = false; document.body.classList.add('is-list'); listEl.scrollTop = 0; $('#list-close').focus(); };
+const openList = () => { ensureClassic(); listEl.hidden = false; document.body.classList.add('is-list'); listEl.scrollTop = 0; $('#list-close').focus(); };
 const closeList = () => { listEl.hidden = true; document.body.classList.remove('is-list'); };
-$('#list-close').addEventListener('click', closeList);
 
 
 /* ---------- étiquettes de zone ---------- */
@@ -137,6 +142,7 @@ function renderPanel(item) {
     body += `<div class="contact">
       <div class="row"><span class="mono">E-mail</span><a href="mailto:${esc(profile.email)}" id="mail">${esc(profile.email)}</a><button class="copy mono" data-copy="${esc(profile.email)}">Copier</button></div>
       <div class="row"><span class="mono">Téléphone</span><span>${esc(profile.phone)}</span><button class="copy mono" data-copy="${esc(profile.phone)}">Copier</button></div>
+      <div class="row"><span class="mono">CV</span><a href="${esc(profile.cv)}" download="CV-Yann-Cotan.pdf" target="_blank" rel="noopener">Télécharger (PDF) ↓</a></div>
       ${profile.github ? `<div class="row"><span class="mono">GitHub</span><a href="${esc(profile.github)}" target="_blank" rel="noopener">github.com/YannCotan ↗</a></div>` : ''}
       ${profile.linkedin ? `<div class="row"><span class="mono">LinkedIn</span><a href="${esc(profile.linkedin)}" target="_blank" rel="noopener">Ouvrir ↗</a></div>` : ''}
     </div>`;

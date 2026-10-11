@@ -13,7 +13,7 @@ export const PHOTOS = [
 export const HOME_VIEWS = {
   home: { pos: [0.9, 1.75, 3.9], target: [0, 1.15, -1.2] },
   code: { pos: [-0.25, 1.4, -0.3], target: [-0.25, 1.2, -2.25] },
-  jeux: { pos: [0.95, 1.4, -0.3], target: [0.85, 1.2, -2.25] },
+  jeux: { pos: [0.62, 1.38, -0.1], target: [0.55, 1.0, -2.05] },
   manga: { pos: [-1.2, 1.7, 0.9], target: [-3.0, 1.55, -0.9] },
   musique: { pos: [-0.9, 1.4, 0.6], target: [-2.6, 0.85, -1.3] },
   voitures: { pos: [-0.9, 1.6, 1.9], target: [-3.0, 1.5, 0.1] },
@@ -31,7 +31,7 @@ export function createHome() {
   const S = (c, r = 0.7, m = 0) => new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: m });
   const B = (w, h, d) => new THREE.BoxGeometry(w, h, d);
   const add = (parent, geo, mat, x, y, z) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); parent.add(o); return o; };
-  const tex = (c) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+  const tex = (c) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
   const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; };
   // marque un groupe comme cliquable pour un hobby donné
   const hot = (obj, id) => {
@@ -108,13 +108,66 @@ export function createHome() {
   monitor(code, -0.3, 0.1, 'code');
   monitor(game, 0.9, -0.1, 'jeux');
 
-  // clavier RVB, tapis, souris, casque, manette
-  const kb = new THREE.Group(); kb.position.set(0.3, 0.79, -1.88); scene.add(kb);
-  add(kb, B(0.46, 0.02, 0.15), dark, 0, 0, 0);
-  const keyM = rgb('#00e5ff'); add(kb, B(0.43, 0.006, 0.12), keyM, 0, 0.012, 0);
-  add(scene, B(1.0, 0.004, 0.42), S('#0e0e16', 0.9), 0.55, 0.793, -1.9);
-  add(scene, B(1.0, 0.005, 0.01), rgb('#ff5b14'), 0.55, 0.796, -1.69);
-  add(scene, B(0.06, 0.03, 0.1), dark, 0.78, 0.81, -1.9);
+  // tapis de bureau XXL
+  add(scene, B(1.3, 0.004, 0.46), S('#0e0e16', 0.95), 0.45, 0.793, -1.88);
+  add(scene, B(1.3, 0.005, 0.008), rgb('#ff5b14'), 0.45, 0.796, -1.655);
+  add(scene, B(1.3, 0.005, 0.008), rgb('#ff5b14'), 0.45, 0.796, -2.105);
+
+  // clavier mécanique 60 % RVB : 61 touches, boîtier alu, éclairage sous les touches, légendes
+  const kb = new THREE.Group(); kb.position.set(0.17, 0.795, -1.86); kb.rotation.x = 0.07; scene.add(kb);
+  const U = 0.0268, ROWS = [
+    [['Esc', 1], ['1', 1], ['2', 1], ['3', 1], ['4', 1], ['5', 1], ['6', 1], ['7', 1], ['8', 1], ['9', 1], ['0', 1], ['-', 1], ['=', 1], ['⌫', 2]],
+    [['Tab', 1.5], ['Q', 1], ['W', 1], ['E', 1], ['R', 1], ['T', 1], ['Y', 1], ['U', 1], ['I', 1], ['O', 1], ['P', 1], ['[', 1], [']', 1], ['\\', 1.5]],
+    [['Caps', 1.75], ['A', 1], ['S', 1], ['D', 1], ['F', 1], ['G', 1], ['H', 1], ['J', 1], ['K', 1], ['L', 1], [';', 1], ["'", 1], ['Enter', 2.25]],
+    [['Shift', 2.25], ['Z', 1], ['X', 1], ['C', 1], ['V', 1], ['B', 1], ['N', 1], ['M', 1], [',', 1], ['.', 1], ['/', 1], ['Shift', 2.75]],
+    [['Ctrl', 1.25], ['Win', 1.25], ['Alt', 1.25], ['', 6.25], ['Alt', 1.25], ['Fn', 1.25], ['Menu', 1.25], ['Ctrl', 1.25]],
+  ];
+  const KW = 15 * U, KD = 5 * U;
+  add(kb, B(KW + 0.03, 0.022, KD + 0.03), S('#1a1a24', 0.35, 0.7), 0, 0.011, 0);
+  add(kb, B(KW + 0.034, 0.004, KD + 0.034), rgb('#7c5cff'), 0, 0.001, 0);              // halo sous le boîtier
+  add(kb, new THREE.PlaneGeometry(KW + 0.005, KD + 0.005), rgb('#00e5ff'), 0, 0.0224, 0).rotation.x = -Math.PI / 2; // lumière entre les touches
+  const keyCount = ROWS.reduce((n, r) => n + r.length, 0);
+  const caps = new THREE.InstancedMesh(B(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.1 }), keyCount);
+  const [lc, lg] = cv(1280, 430);
+  lg.fillStyle = '#e8fbff'; lg.textAlign = 'center'; lg.textBaseline = 'middle';
+  const mtx = new THREE.Matrix4(), col = new THREE.Color();
+  let ki = 0;
+  ROWS.forEach((row, r) => {
+    let x = -KW / 2;
+    row.forEach(([label, w]) => {
+      const kw = w * U - 0.0036, cx = x + (w * U) / 2, cz = (r - 2) * U;
+      mtx.compose(new THREE.Vector3(cx, 0.0235 + 0.0035, cz), new THREE.Quaternion(), new THREE.Vector3(kw, 0.014, U - 0.0036));
+      caps.setMatrixAt(ki, mtx);
+      const accent = label === 'Esc' || label === 'Enter';
+      caps.setColorAt(ki, col.set(accent ? '#e5561b' : w > 1 && label !== '' ? '#2c2c3a' : '#1c1c26'));
+      ki++;
+      // légende (texte sur un canevas unique, 1 u = 80 px)
+      if (label) { lg.font = `600 ${label.length > 2 ? 22 : 30}px "IBM Plex Mono", monospace`; lg.fillText(label, ((cx + KW / 2) / KW) * 1280, ((cz + KD / 2) / KD) * 430); }
+      x += w * U;
+    });
+  });
+  caps.castShadow = false; kb.add(caps);
+  const legends = add(kb, new THREE.PlaneGeometry(KW, KD), new THREE.MeshBasicMaterial({ map: tex(lc), transparent: true, depthWrite: false, toneMapped: false }), 0, 0.0316, 0);
+  legends.rotation.x = -Math.PI / 2; legends.renderOrder = 2;
+  const cable = (pts, r = 0.0045) => add(scene, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p))), 24, r, 6), S('#0a0a0f', 0.8), 0, 0, 0);
+  cable([[0.17, 0.8, -2.02], [0.17, 0.79, -2.4], [0.3, 0.6, -2.58], [1.2, 0.2, -2.5], [2.05, 0.1, -2.2]]);
+  hot(kb, 'jeux');
+
+  // souris gaming : coque ergonomique, boutons, molette et bandeaux RVB
+  const mouse = new THREE.Group(); mouse.position.set(0.88, 0.797, -1.86); mouse.rotation.y = 0.1; scene.add(mouse);
+  const mBlack = S('#14141b', 0.4, 0.2);
+  const body = add(mouse, new THREE.CapsuleGeometry(0.036, 0.075, 8, 20), mBlack, 0, 0.022, 0);
+  body.rotation.x = Math.PI / 2; body.scale.set(1.15, 1, 0.58);
+  add(mouse, new THREE.SphereGeometry(0.032, 16, 12), mBlack, 0, 0.026, 0.035).scale.set(1.1, 0.55, 1.3);
+  for (const sx of [-0.0145, 0.0145]) add(mouse, B(0.026, 0.004, 0.058), S('#22222c', 0.35, 0.3), sx, 0.0425, -0.04);
+  add(mouse, B(0.003, 0.0045, 0.062), S('#050508'), 0, 0.0428, -0.04);
+  const wheel = add(mouse, new THREE.CylinderGeometry(0.0085, 0.0085, 0.013, 14), rgb('#ff2fa8'), 0, 0.046, -0.038); wheel.rotation.z = Math.PI / 2;
+  for (const sz of [-0.012, 0.008]) add(mouse, B(0.004, 0.006, 0.016), S('#2c2c3a', 0.4), -0.0445, 0.022, sz);
+  add(mouse, B(0.006, 0.0032, 0.1), rgb('#00e5ff'), -0.0415, 0.006, 0.0);
+  add(mouse, B(0.006, 0.0032, 0.1), rgb('#00e5ff'), 0.0415, 0.006, 0.0);
+  add(mouse, B(0.018, 0.0022, 0.018), rgb('#ff5b14'), 0, 0.0405, 0.05);
+  cable([[0.88, 0.805, -1.95], [0.88, 0.8, -2.1], [0.95, 0.7, -2.5], [1.5, 0.3, -2.45], [2.05, 0.1, -2.15]]);
+  hot(mouse, 'jeux');
   const hs = new THREE.Group(); hs.position.set(-0.95, 0.79, -1.95); scene.add(hs);
   add(hs, new THREE.CylinderGeometry(0.06, 0.07, 0.015, 16), dark, 0, 0, 0); add(hs, new THREE.CylinderGeometry(0.01, 0.01, 0.2, 8), dark, 0, 0.1, 0);
   const band = add(hs, new THREE.TorusGeometry(0.085, 0.014, 8, 20, Math.PI), dark, 0, 0.23, 0);
@@ -214,7 +267,7 @@ export function createHome() {
     const ph = PHOTOS[f.p], w = f.hh * (ph.w / ph.h);
     const g = new THREE.Group(); g.position.set(3.19, f.y, f.z); g.rotation.y = -Math.PI / 2; trips.add(g);
     add(g, B(w + 0.1, f.hh + 0.1, 0.03), S('#f3efe4', 0.6), 0, 0, -0.01);
-    const t = loader.load(ph.src); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    const t = loader.load(ph.src); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
     const pm = add(g, new THREE.PlaneGeometry(w, f.hh), new THREE.MeshStandardMaterial({ map: t, roughness: 0.6, emissive: '#fff', emissiveMap: t, emissiveIntensity: 0.18 }), 0, 0, 0.008);
     pm.userData.photo = f.p;
   });
@@ -230,40 +283,33 @@ export function createHome() {
   const L = (c, i, d, x, y, z) => { const l = new THREE.PointLight(c, i, d); l.position.set(x, y, z); scene.add(l); return l; };
   L('#00e5ff', 3.2, 5, 0.3, 1.5, -1.6);
   const pink = L('#ff2fa8', 3.5, 5, -2.4, 1.2, -0.4);
-  L('#ff8a3a', 2.4, 5, 2.4, 2.2, 0.6);
-  L('#7c5cff', 2.0, 4, 1.9, 0.5, -1.6);
-  L('#ffb878', 7, 9, 0.2, 2.6, 0.6);
-  L('#ffb878', 4, 6, -1.8, 2.4, -1.4);
+  L('#ffb878', 8, 10, 0.2, 2.6, 0.2);
 
   // ---------- écrans animés
+  // Écrans fixes (dessinés une seule fois) : un fond d'écran sur le moniteur de gauche, un écran de jeu sur celui de droite
   const lines = [
     [['const ', '#c792ea'], ['yann', '#82aaff'], [' = {', '#d6deeb']],
-    [['  role', '#7fdbca'], [': ', '#d6deeb'], ["'développeur fullstack'", '#ecc48d'], [',', '#d6deeb']],
+    [['  role', '#7fdbca'], [': ', '#d6deeb'], ["'fullstack'", '#ecc48d'], [',', '#d6deeb']],
     [['  ville', '#7fdbca'], [': ', '#d6deeb'], ["'Abidjan'", '#ecc48d'], [',', '#d6deeb']],
-    [['  stack', '#7fdbca'], [': [', '#d6deeb'], ["'React'", '#ecc48d'], [', ', '#d6deeb'], ["'Node.js'", '#ecc48d'], [',', '#d6deeb']],
-    [['    ', '#d6deeb'], ["'PostgreSQL'", '#ecc48d'], [', ', '#d6deeb'], ["'Redis'", '#ecc48d'], [', ', '#d6deeb'], ["'Docker'", '#ecc48d'], [']', '#d6deeb'], [',', '#d6deeb']],
     [['  gamer', '#7fdbca'], [': ', '#d6deeb'], ['true', '#ff5874'], [',', '#d6deeb']],
     [['};', '#d6deeb']],
-    [['// prêt à coder avec toi', '#637777']],
   ];
-  const total = lines.reduce((n, l) => n + l.reduce((m, s) => m + s[0].length, 0), 0);
-  function drawCode(t) {
-    const g = code.g; g.fillStyle = '#011627'; g.fillRect(0, 0, SW, SH);
-    g.fillStyle = '#0b2942'; g.fillRect(0, 0, SW, 30); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 150, 30); g.fillStyle = '#011627'; g.font = '500 14px "IBM Plex Mono", monospace'; g.fillText('yann.js', 14, 20);
-    g.fillStyle = '#5f7e97'; g.fillText('portfolio.js', 166, 20);
-    g.font = '500 19px "IBM Plex Mono", monospace';
-    let remaining = Math.floor((t * 14) % (total + 40)), y = 62, done = false;
-    lines.forEach((l, i) => {
-      if (done) return;
-      let x = 40; g.fillStyle = '#4b6479'; g.fillText(String(i + 1), 12, y);
-      for (const [seg, c] of l) {
-        const part = seg.slice(0, Math.max(0, remaining));
-        g.fillStyle = c; g.fillText(part, x, y); x += g.measureText(part).width; remaining -= seg.length;
-        if (remaining <= 0) { if (Math.floor(t * 2) % 2) { g.fillStyle = '#ffffff'; g.fillRect(x + 1, y - 16, 10, 22); } done = true; break; }
-      }
-      y += 30;
-    });
-    g.fillStyle = '#0b2942'; g.fillRect(0, SH - 24, SW, 24); g.fillStyle = '#7fdbca'; g.font = '500 13px "IBM Plex Mono", monospace'; g.fillText('main ●  JavaScript  UTF-8', 12, SH - 8);
+  function drawWallpaper() {
+    const g = code.g, hz = 210;
+    const sky = g.createLinearGradient(0, 0, 0, hz); sky.addColorStop(0, '#0d0626'); sky.addColorStop(0.55, '#5a1b6e'); sky.addColorStop(1, '#ff5b14'); g.fillStyle = sky; g.fillRect(0, 0, SW, SH);
+    const sun = g.createRadialGradient(430, hz - 10, 4, 430, hz - 10, 90); sun.addColorStop(0, '#fff3c0'); sun.addColorStop(0.5, '#ffb347'); sun.addColorStop(1, 'rgba(255,91,20,0)'); g.fillStyle = sun; g.fillRect(300, 60, 260, 200);
+    g.fillStyle = '#ffd27a'; g.beginPath(); g.arc(430, hz - 10, 54, Math.PI, 0); g.fill();
+    g.fillStyle = '#120a22'; for (let x = 0; x < SW; x += 22) { const h = 30 + ((x * 53) % 80); g.fillRect(x, hz - h, 20, h + 2); }
+    g.fillRect(540, hz - 120, 5, 120); g.fillRect(500, hz - 120, 120, 5); g.fillRect(610, hz - 120, 3, 40);
+    g.fillStyle = '#0a0614'; g.fillRect(0, hz, SW, SH - hz);
+    g.strokeStyle = '#ff2fa8'; g.lineWidth = 1.5;
+    for (let i = -12; i <= 12; i++) { g.beginPath(); g.moveTo(320 + i * 6, hz); g.lineTo(320 + i * 90, SH); g.stroke(); }
+    for (let k = 1; k < 9; k++) { const y = hz + (k * k) * 2.1; g.beginPath(); g.moveTo(0, y); g.lineTo(SW, y); g.stroke(); }
+    // petite fenêtre de code
+    g.fillStyle = 'rgba(1,22,39,.92)'; g.fillRect(24, 28, 250, 124); g.fillStyle = '#0b2942'; g.fillRect(24, 28, 250, 20);
+    g.fillStyle = '#ff5b14'; g.fillRect(32, 34, 8, 8); g.fillStyle = '#f0b400'; g.fillRect(46, 34, 8, 8); g.fillStyle = '#3a7a58'; g.fillRect(60, 34, 8, 8);
+    g.font = '500 14px "IBM Plex Mono", monospace';
+    lines.forEach((l, i) => { let x = 36; for (const [seg, c] of l) { g.fillStyle = c; g.fillText(seg, x, 74 + i * 20); x += g.measureText(seg).width; } });
     code.t.needsUpdate = true;
   }
   function drawGame(t) {
@@ -278,18 +324,15 @@ export function createHome() {
       g.fillStyle = ph ? '#e5561b' : '#f3efe4'; g.fillRect(320 - half, y, 6 + k * 10, 3); g.fillRect(320 + half - (6 + k * 10), y, 6 + k * 10, 3);
       if (ph) { g.fillStyle = '#f0b400'; g.fillRect(318, y, 4 + k * 6, 3); }
     }
-    const cx = 320 + Math.sin(t * 1.3) * 60;
+    const cx = 320;
     g.fillStyle = '#c9382a'; g.fillRect(cx - 46, 290, 92, 30); g.fillStyle = '#16150f'; g.fillRect(cx - 34, 272, 68, 22); g.fillStyle = '#ff2f2f'; g.fillRect(cx - 44, 300, 18, 8); g.fillRect(cx + 26, 300, 18, 8); g.fillStyle = '#0a0a0a'; g.fillRect(cx - 52, 312, 18, 14); g.fillRect(cx + 34, 312, 18, 14);
-    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(14, 12, 150, 56); g.fillStyle = '#f3efe4'; g.font = '700 34px "Barlow Condensed", sans-serif'; g.fillText(`${200 + Math.floor(Math.sin(t) * 12)} KM/H`, 24, 52);
+    g.fillStyle = 'rgba(0,0,0,.45)'; g.fillRect(14, 12, 150, 56); g.fillStyle = '#f3efe4'; g.font = '700 34px "Barlow Condensed", sans-serif'; g.fillText('212 KM/H', 24, 52);
     g.font = '500 13px "IBM Plex Mono", monospace'; g.fillStyle = '#f0b400'; g.fillText('LAP 2/3  P1', 24, 28);
     game.t.needsUpdate = true;
   }
-  drawCode(0); drawGame(0);
+  drawWallpaper(); drawGame(0.8);
 
-  let frame = 0;
   function update(dt, t, extra = {}) {
-    frame++;
-    if (frame % 3 === 0) { drawCode(t); drawGame(t); }
     const h = (t * 0.12) % 1;
     rgbMats.forEach((m, i) => m.emissive.setHSL((h + i * 0.13) % 1, 1, 0.55));
     pink.intensity = 3.2 + Math.sin(t * 2) * 0.6;
@@ -300,7 +343,7 @@ export function createHome() {
     for (const hm of hotMats) {
       const target = extra.hover === hm.id ? 1 : 0;
       hm.amt = (hm.amt || 0) + (target - (hm.amt || 0)) * 0.2;
-      if (hm.mat.emissive && !hm.mat.isMeshBasicMaterial) { hm.mat.emissive.set('#ff8a3a'); hm.mat.emissiveIntensity = hm.amt * 0.45; }
+      if (hm.mat.emissive && !hm.mat.isMeshBasicMaterial) { hm.mat.emissive.set('#ff8a3a'); hm.mat.emissiveIntensity = hm.amt * 0.18; }
       else hm.mat.color.copy(hm.base).multiplyScalar(1 + hm.amt * 0.45);
     }
   }

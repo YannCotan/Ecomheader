@@ -119,6 +119,10 @@ a { color: inherit; }
 .nav__desk { background: var(--hazard) !important; }
 .nav__desk:hover { background: var(--safety) !important; }
 
+.intro__cv { font-size: 12px; margin-top: -2px; }
+.intro__cv a { border-bottom: 2px solid var(--safety); text-decoration: none; padding-bottom: 1px; }
+.intro__cv a:hover { background: var(--hazard); }
+
 /* chez moi : galerie, bouton audio */
 .gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
 .gallery button { padding: 0; border: 2px solid var(--ink); background: none; width: 92px; height: 120px; overflow: hidden; }

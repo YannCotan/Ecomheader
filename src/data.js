@@ -7,6 +7,7 @@ export const profile = {
   phone: '+225 07 09 16 84 32',
   github: 'https://github.com/YannCotan',
   linkedin: '', // ex: 'https://www.linkedin.com/in/ton-profil'
+  cv: 'cv-yann-cotan.pdf', // fichier dans /public
 };
 
 export const zoneMeta = {

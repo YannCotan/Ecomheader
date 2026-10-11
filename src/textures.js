@@ -22,7 +22,7 @@ function canvas(w, h) {
 function toTex(c, repeat = false) {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 8;
+  t.anisotropy = 4;
   if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;
 }
@@ -99,7 +99,7 @@ export function sideTexture({ color, ink = '#f3efe4', label = '', code = '', siz
 }
 
 export function endTexture({ color, ink = '#f3efe4', code = '', door = true, seed = 1 }) {
-  const w = 420, h = 450;
+  const w = 288, h = 308;
   const [c, x] = canvas(w, h);
   const r = rng(seed);
   x.fillStyle = color; x.fillRect(0, 0, w, h);
