@@ -79,7 +79,7 @@ export const items = [
 
   // ---- Zone C : projets (emplacements à remplir avec tes vrais projets)
   { id: 'p1', zone: 'projets', kind: 'projet', title: 'Gestion Achat', sub: 'Abidjan Terminal', period: 'Application interne', color: C.orange, size: 40, body: ['Application de gestion des demandes d\'achat, conçue et développée pour Abidjan Terminal.', 'Elle suit les demandes de bout en bout, des proformas jusqu\'aux commandes.'], tags: ['PHP', 'Gestion', 'Application interne'] },
-  { id: 'p2', zone: 'projets', kind: 'projet', title: 'Safedeal', sub: 'par Safe Deal · startup', period: 'En cours', color: C.blue, size: 40, link: 'https://safedeal.live', body: ['Safedeal est la startup que je suis en train de monter, portée par Safe Deal.', 'Le détail du produit est sur safedeal.live.'], tags: ['Startup', 'En cours'] },
+  { id: 'p2', zone: 'projets', kind: 'projet', title: 'Safedeal', sub: 'par Safe Deal · fintech', period: 'En cours', color: C.blue, size: 40, link: 'https://safedeal.live', body: ['Plateforme fintech de tiers de confiance qui sécurise les transactions C2C, C2B et B2B sur le marché ivoirien en ligne, bientôt étendue à la zone UEMOA.', 'C\'est la startup que je suis en train de monter, portée par Safe Deal.'], tags: ['Fintech', 'Tiers de confiance', 'C2C · C2B · B2B', 'UEMOA'] },
   { id: 'p3', zone: 'projets', kind: 'projet', title: 'Projet à venir', sub: 'Emplacement réservé', color: C.green, size: 40, body: ['Cet emplacement accueillera un prochain projet.'], tags: ['À venir'] },
 
   // ---- Zone D : formation
