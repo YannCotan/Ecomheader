@@ -5,7 +5,7 @@ export const profile = {
   name: 'Yann Cotan',
   email: 'Cotanyann@gmail.com',
   phone: '+225 07 09 16 84 32',
-  github: '', // ex: 'https://github.com/ton-pseudo'
+  github: 'https://github.com/YannCotan',
   linkedin: '', // ex: 'https://www.linkedin.com/in/ton-profil'
 };
 
@@ -15,15 +15,23 @@ export const zoneMeta = {
   projets: { tag: 'C', name: 'Projets', blurb: 'Réalisations.' },
   formation: { tag: 'D', name: 'Formation', blurb: 'Diplômes et certification.' },
   gate: { tag: '↗', name: 'Contact', blurb: 'Pour une mission ou une question.' },
-  bureau: { tag: 'E', name: 'Mon bureau', blurb: 'Ce que j\'aime en dehors du code.' },
+  bureau: { tag: 'E', name: 'Chez moi', blurb: 'Ce que j\'aime en dehors du code.' },
 };
 
-// Hobbies affichés sur l'ordinateur du bureau. `picks` : tes favoris (titres, artistes, jeux), à compléter.
+// Hobbies de la chambre « chez moi » : un objet 3D par hobby. `picks` : tes favoris (titres, artistes, jeux), à compléter.
 export const hobbies = [
-  { id: 'manga', label: 'Manga & anime', text: 'J\'aime regarder des mangas. C\'est ma façon de décrocher après une journée de code.', picks: [] },
-  { id: 'jeux', label: 'Jeux vidéo', text: 'Je joue pendant mon temps libre : un bon moyen de réfléchir autrement aux systèmes et à leurs règles.', picks: [] },
-  { id: 'musique', label: 'Musique', text: 'J\'écoute de la musique en continu, surtout quand je code.', picks: [] },
+  { id: 'code', label: 'Coder', text: 'J\'aime coder : construire des choses qui marchent, de l\'interface jusqu\'au serveur.', picks: [] },
+  { id: 'jeux', label: 'Jeux vidéo', text: 'Je suis un peu gamer. J\'aime jouer pendant mon temps libre.', picks: [], soon: true },
+  { id: 'manga', label: 'Manga', text: 'J\'aime regarder des mangas.', picks: [], soon: true },
+  { id: 'musique', label: 'Musique', text: 'J\'aime écouter de la musique. Clique sur la platine, ou sur le bouton ci-dessous, pour lancer une ambiance lo-fi composée pour ce site.', picks: [], soon: true, audio: true },
+  { id: 'voitures', label: 'Voitures', text: 'J\'aime beaucoup les voitures.', picks: [], soon: true },
+  { id: 'voyages', label: 'Voyages', text: 'Je voyage souvent. Quelques photos de ces moments : clique sur un cadre pour l\'agrandir.', picks: [], gallery: true },
 ];
+
+export const about = {
+  age: 25,
+  line: '25 ans, développeur fullstack à Abidjan. J\'aime coder, les jeux vidéo, les voitures, la musique et voyager.',
+};
 
 export const kindLabel = {
   outil: 'Outil',
@@ -31,6 +39,8 @@ export const kindLabel = {
   projet: 'Projet',
   formation: 'Formation',
   contact: 'Contact',
+  portal: 'Portail temporel',
+  home: 'Chez moi',
 };
 
 const C = {

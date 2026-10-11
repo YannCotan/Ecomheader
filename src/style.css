@@ -119,13 +119,56 @@ a { color: inherit; }
 .nav__desk { background: var(--hazard) !important; }
 .nav__desk:hover { background: var(--safety) !important; }
 
+/* chez moi : galerie, bouton audio */
+.gallery { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.gallery button { padding: 0; border: 2px solid var(--ink); background: none; width: 92px; height: 120px; overflow: hidden; }
+.gallery button:hover { border-color: var(--safety); transform: translateY(-2px); }
+.gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lofi { align-self: flex-start; background: var(--ink); color: var(--paper); border: 0; padding: 8px 14px; font-size: 13px; margin-top: 4px; }
+.lofi:hover { background: var(--safety); color: var(--ink); }
+.lightbox { position: fixed; inset: 0; z-index: 60; background: rgba(10,10,14,.86); display: grid; place-items: center; padding: 20px; pointer-events: auto; cursor: zoom-out; }
+.lightbox[hidden] { display: none; }
+.lightbox figure { margin: 0; max-width: min(92vw, 720px); max-height: 88vh; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.lightbox img { max-width: 100%; max-height: 78vh; border: 6px solid var(--paper); display: block; }
+.lightbox figcaption { color: var(--paper); font-size: 13px; }
+.lightbox .close { position: absolute; top: 16px; right: 16px; color: var(--paper); border-color: var(--paper); }
+
+/* voyage dans le temps */
+.warp { position: fixed; inset: 0; z-index: 50; pointer-events: none; visibility: hidden; background: var(--ink); }
+.warp.on { visibility: visible; pointer-events: auto; }
+.warp canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.warp__clock { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); font-size: clamp(64px, 14vw, 180px); font-weight: 500; color: var(--paper); text-shadow: 0 0 40px var(--safety), 0 0 8px var(--hazard); letter-spacing: .04em; }
+.warp__label { position: absolute; left: 50%; top: calc(46% + clamp(50px, 9vw, 110px)); transform: translateX(-50%); font-size: 14px; letter-spacing: .2em; text-transform: uppercase; color: var(--hazard); white-space: nowrap; }
+
+/* appel à l'action permanent */
+.cta { position: absolute; right: var(--gap); bottom: max(var(--gap), env(safe-area-inset-bottom, 0px)); font-family: var(--font-display); font-weight: 700; font-size: 20px; letter-spacing: .05em; text-transform: uppercase;
+  background: var(--safety); color: var(--ink); border: 2px solid var(--ink); padding: 8px 18px 6px; box-shadow: 5px 5px 0 var(--ink); transition: transform .12s, box-shadow .12s, opacity .3s; opacity: 0; pointer-events: none; }
+.entered .cta { opacity: 1; pointer-events: auto; }
+.cta span { display: inline-block; transition: transform .15s; }
+.cta:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0 var(--ink); }
+.cta:hover span { transform: translateX(4px); }
+.has-panel .cta, .at-home .cta { opacity: 0; pointer-events: none; }
+
+/* dans la chambre */
+.nav__back { display: none; background: var(--hazard) !important; }
+.at-home .nav__back { display: inline-block; }
+.at-home .nav [data-zone], .at-home .nav [data-action="about"] { display: none; }
+.at-home .nav__alt { background: var(--paper) !important; border-style: solid !important; }
+
 /* passe d'accès (accueil) */
 .intro { position: absolute; inset: 0; margin: auto; width: min(560px, calc(100vw - 2 * var(--gap))); height: fit-content; max-height: calc(100vh - 2 * var(--gap)); overflow: auto;
   background: var(--paper); border: 2px solid var(--ink); box-shadow: 10px 10px 0 rgba(22,21,15,.3); z-index: 10; }
 .intro.gone { display: none; }
+.intro__head { display: flex; gap: 18px; align-items: flex-end; }
+.intro__photo { width: 132px; height: 132px; object-fit: cover; border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--safety); flex: none; background: var(--concrete); }
+.intro__tag { font-size: 12px; color: var(--safety); margin-top: 6px; }
+.intro__cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.intro__cta .go { margin-top: 0; }
+.go--ghost { background: transparent !important; box-shadow: none !important; font-size: 20px !important; }
+.go--ghost:hover { background: var(--hazard) !important; }
 .intro__in { padding: 22px 28px 28px; display: flex; flex-direction: column; gap: 14px; }
 .intro__pass { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.intro h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(54px, 11vw, 88px); line-height: .88; text-transform: uppercase; letter-spacing: .01em; }
+.intro h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 9vw, 76px); line-height: .88; text-transform: uppercase; letter-spacing: .01em; }
 .intro__lead { font-size: 19px; line-height: 1.4; font-weight: 500; }
 .intro dl { border-top: 2px solid var(--ink); }
 .intro dl div { display: grid; grid-template-columns: 120px 1fr; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(22,21,15,.25); font-size: 13px; }
@@ -143,6 +186,9 @@ a { color: inherit; }
 .list[hidden] { display: none; }
 .list__in { max-width: 760px; margin: 0 auto; padding: 24px var(--gap) 80px; display: flex; flex-direction: column; gap: 18px; }
 .list .close { align-self: flex-start; font-size: 13px; }
+.list__me { display: flex; gap: 18px; align-items: center; }
+.list__me img { width: 96px; height: 96px; object-fit: cover; border: 3px solid var(--ink); flex: none; }
+.list__me p { margin-top: 6px; font-size: 13px; }
 .list h1 { font-family: var(--font-display); font-size: clamp(48px, 9vw, 80px); text-transform: uppercase; line-height: .9; }
 .list section { border-top: 3px solid var(--ink); padding-top: 14px; display: flex; flex-direction: column; gap: 16px; }
 .list h2 { font-family: var(--font-display); font-size: 32px; text-transform: uppercase; }
@@ -168,6 +214,9 @@ a { color: inherit; }
   .has-panel .panel { bottom: var(--gap); }
   .desk .pager { display: none; }
   .intro__in { padding: 18px 20px 22px; }
+  .intro__photo { width: 96px; height: 96px; }
+  .cta { bottom: calc(var(--gap) + 44px); right: var(--gap); font-size: 17px; }
+  .at-home .nav { bottom: var(--gap); }
   .intro__lead { font-size: 17px; }
   .intro dl div { grid-template-columns: 96px 1fr; }
 }

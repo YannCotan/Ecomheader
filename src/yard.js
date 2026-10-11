@@ -3,6 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import gsap from 'gsap';
 import { sideTexture, endTexture, groundTexture, ribTexture, barrierTexture, hash } from './textures.js';
 import { isoCode } from './iso.js';
+import { createHome, HOME_VIEWS } from './home.js';
+import { createLofi } from './audio.js';
 
 // dimensions d'un conteneur ISO (mètres)
 const W = 2.44, H = 2.59, L20 = 6.1, L40 = 12.2, GAP = 0.36;
@@ -15,11 +17,12 @@ export const ZONES = {
   projets: { center: [22, 0, 2], dist: 34 },
   formation: { center: [-4, 0, 10.5], dist: 28 },
   gate: { center: [21, 0, 15.5], dist: 20 },
-  bureau: { center: [37, 2, 17], dist: 17 },
+  bureau: { center: [31, 2, 19], dist: 22 },
 };
+const HOT_LABEL = { code: 'Coder', jeux: 'Jeux vidéo', manga: 'Manga', musique: 'Musique', voitures: 'Voitures', voyages: 'Voyages' };
 const OVERVIEW = { target: [-3, 0, 4], offset: [12, 44, 78] };
 
-export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, onDesk, onDeskTab }) {
+export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, onPortal, onHomeHot, onPhoto }) {
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
@@ -93,7 +96,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   outline(22, 2.4, 14, 11.4);
   outline(-4, 10.5, 20, 4.4);
   outline(21, 15.5, 8, 4.4);
-  outline(37, 18, 10, 8);
+  outline(31, 19, 8, 4);
 
   // ---------- conteneurs
   const sideCache = new Map(), endCache = new Map();
@@ -227,137 +230,22 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   });
 
 
-  // ---------- bureau (cabine avec poste de travail)
-  const OX = 37, OZ = 18;
-  const office = new THREE.Group(); office.position.set(OX, 0, OZ); scene.add(office);
-  const sm = (c, r = 0.8, m = 0) => new THREE.MeshStandardMaterial({ color: c, roughness: r, metalness: m });
-  const BX = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-  const put = (geo, mat, x, y, z, cast = true) => { const o = new THREE.Mesh(geo, mat); o.position.set(x, y, z); o.castShadow = cast; o.receiveShadow = true; office.add(o); return o; };
-  put(BX(8, 0.2, 6), sm('#8d887b', 1), 0, 0.1, 0);
-  put(BX(7.8, 0.04, 5.8), sm('#5a4a3a', 1), 0, 0.22, 0, false);
-  put(BX(8, 3.8, 0.2), sm('#2b2622', 0.9), 0, 2.1, -2.9);
-  put(BX(0.2, 3.8, 6), sm('#d9d5c8', 0.7, 0.2), -3.9, 2.1, 0);
-  put(BX(0.2, 3.8, 6), sm('#d9d5c8', 0.7, 0.2), 3.9, 2.1, 0);
-  put(BX(8.4, 0.25, 6.4), sm('#e5561b', 0.6, 0.2), 0, 4.1, 0.1);
-  put(BX(7.6, 0.07, 0.07), new THREE.MeshStandardMaterial({ color: '#ff8a3a', emissive: '#ff7a2a', emissiveIntensity: 2.2 }), 0, 3.85, -2.78, false);
-
-  // enseigne sur le toit
-  const signC = document.createElement('canvas'); signC.width = 640; signC.height = 160;
-  { const g = signC.getContext('2d');
-    g.fillStyle = '#f0b400'; g.fillRect(0, 0, 640, 160);
-    g.fillStyle = '#16150f'; for (let i = -160; i < 640; i += 48) { g.beginPath(); g.moveTo(i, 160); g.lineTo(i + 24, 160); g.lineTo(i + 64, 0); g.lineTo(i + 40, 0); g.fill(); }
-    g.fillStyle = '#16150f'; g.fillRect(70, 26, 500, 108);
-    g.fillStyle = '#f3efe4'; g.font = '700 92px "Barlow Condensed", sans-serif'; g.textBaseline = 'middle'; g.textAlign = 'center'; g.fillText('MON BUREAU', 320, 84); }
-  const signTex = new THREE.CanvasTexture(signC); signTex.colorSpace = THREE.SRGBColorSpace;
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.25), new THREE.MeshStandardMaterial({ map: signTex, roughness: 0.7 }));
-  sign.position.set(0, 5.2, 0.4); office.add(sign);
-  for (const px of [-2, 2]) put(BX(0.12, 1, 0.12), sm('#2b2b27'), px, 4.7, 0.35, false);
-
-  // bureau, écran, clavier, souris
-  const wood = sm('#a9825a', 0.7);
-  put(BX(4.6, 0.1, 1.5), wood, 0, 1.1, -2.0);
-  for (const [lx, lz] of [[-2.2, -2.6], [2.2, -2.6], [-2.2, -1.4], [2.2, -1.4]]) put(BX(0.1, 1.05, 0.1), sm('#2b2b27', 0.6, 0.4), lx, 0.62, lz);
-  put(BX(0.7, 0.04, 0.45), sm('#1d1d1a', 0.5, 0.4), 0, 1.17, -2.2);
-  put(BX(0.1, 0.5, 0.1), sm('#1d1d1a', 0.5, 0.4), 0, 1.4, -2.3);
-  put(BX(2.3, 1.3, 0.08), sm('#16150f', 0.4, 0.3), 0, 2.2, -2.3);
-  const SW = 768, SH = 480;
-  const sc = document.createElement('canvas'); sc.width = SW; sc.height = SH;
-  const sg = sc.getContext('2d');
-  const screenTex = new THREE.CanvasTexture(sc); screenTex.colorSpace = THREE.SRGBColorSpace; screenTex.anisotropy = 8;
-  const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.14, 1.14), new THREE.MeshBasicMaterial({ map: screenTex, toneMapped: false }));
-  screenMesh.position.set(0, 2.2, -2.255); office.add(screenMesh);
-  put(BX(1.4, 0.05, 0.45), sm('#2b2b27', 0.5, 0.3), -0.1, 1.17, -1.5);
-  put(BX(0.95, 0.02, 0.75), sm('#e5561b', 0.9), 1.3, 1.16, -1.55, false);
-  const mouse = put(BX(0.2, 0.07, 0.32), sm('#f3efe4', 0.4), 1.3, 1.21, -1.55);
-  // casque
-  put(new THREE.CylinderGeometry(0.15, 0.2, 0.05, 16), sm('#2b2b27'), -1.8, 1.17, -1.6);
-  put(new THREE.CylinderGeometry(0.03, 0.03, 0.55, 8), sm('#2b2b27'), -1.8, 1.45, -1.6);
-  const band = put(new THREE.TorusGeometry(0.26, 0.04, 8, 20, Math.PI), sm('#16150f', 0.5), -1.8, 1.72, -1.6); band.castShadow = true;
-  for (const sx of [-0.26, 0.26]) put(new THREE.CylinderGeometry(0.13, 0.13, 0.1, 16), sm('#e5561b', 0.5), -1.8 + sx, 1.72, -1.6).rotation.z = Math.PI / 2;
-  // manette
-  put(BX(0.52, 0.08, 0.3), sm('#3b3b36', 0.5), -0.95, 1.19, -1.0);
-  for (const gx of [-0.15, 0.15]) put(new THREE.CylinderGeometry(0.06, 0.06, 0.03, 12), sm('#16150f'), -0.95 + gx, 1.25, -1.0);
-  put(BX(0.2, 0.08, 0.08), sm('#16150f'), -1.08, 1.255, -0.99, false);
-  // enceintes
-  for (const ex of [-1.55, 1.55]) {
-    put(BX(0.5, 0.9, 0.5), sm('#1d1d1a', 0.7), ex, 1.6, -2.3);
-    const w = put(new THREE.CylinderGeometry(0.17, 0.17, 0.03, 20), sm('#3b3b36', 0.5), ex, 1.5, -2.04, false); w.rotation.x = Math.PI / 2;
-    const t = put(new THREE.CylinderGeometry(0.06, 0.06, 0.03, 12), sm('#3b3b36', 0.5), ex, 1.85, -2.04, false); t.rotation.x = Math.PI / 2;
-  }
-  // piles de mangas et tasse
-  [['#c9382a', 0], ['#2e5b86', 0.07], ['#f0b400', 0.14]].forEach(([c, dy], i) => {
-    const b = put(BX(0.55, 0.07, 0.4), sm(c, 0.8), 1.95, 1.19 + dy, -2.2); b.rotation.y = (i - 1) * 0.18;
-  });
-  put(new THREE.CylinderGeometry(0.11, 0.1, 0.2, 14), sm('#f3efe4', 0.5), 1.0, 1.25, -1.0);
-  // étagère de mangas au mur
-  put(BX(2.4, 0.06, 0.4), wood, 2.4, 3.0, -2.62);
-  ['#c9382a', '#2e5b86', '#f0b400', '#3a7a58', '#f3efe4', '#7d2c3b', '#e5561b', '#263f63', '#c9382a', '#3a7a58'].forEach((c, i) => {
-    const h = 0.55 + ((i * 37) % 5) * 0.04;
-    put(BX(0.16, h, 0.3), sm(c, 0.8), 1.4 + i * 0.2, 3.03 + h / 2, -2.62, false);
-  });
-  // affiches
-  const posterTex = (bg, fg, label) => {
-    const c = document.createElement('canvas'); c.width = 256; c.height = 360; const g = c.getContext('2d');
-    g.fillStyle = bg; g.fillRect(0, 0, 256, 360);
-    g.fillStyle = fg; for (let y = 0; y < 360; y += 12) for (let x = (y / 12) % 2 ? 6 : 0; x < 256; x += 12) { const r = 1 + 4.5 * Math.max(0, Math.sin((y / 360) * Math.PI)) * (0.5 + 0.5 * Math.cos(x / 40)); g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
-    g.fillStyle = '#16150f'; g.fillRect(20, 268, 216, 72);
-    g.fillStyle = '#f3efe4'; g.font = '700 54px "Barlow Condensed", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(label, 128, 306);
-    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
-  };
-  const poster = (map, x) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.83), new THREE.MeshStandardMaterial({ map, roughness: 0.9 })); m.position.set(x, 2.5, -2.78); office.add(m); };
-  poster(posterTex('#f0b400', '#16150f', 'MANGA'), -2.8);
-  poster(posterTex('#e5561b', '#16150f', 'PLAYER 1'), -1.4);
-  // fauteuil
-  put(new THREE.CylinderGeometry(0.4, 0.4, 0.05, 16), sm('#16150f', 0.5, 0.4), -1.4, 0.28, -0.6);
-  put(new THREE.CylinderGeometry(0.06, 0.06, 0.55, 8), sm('#16150f', 0.5, 0.4), -1.4, 0.55, -0.6);
-  put(BX(1, 0.14, 1), sm('#1d1d1a', 0.8), -1.4, 0.9, -0.6);
-  put(BX(1, 1.2, 0.14), sm('#1d1d1a', 0.8), -1.4, 1.55, -0.05);
-  put(BX(0.5, 0.5, 0.16), sm('#e5561b', 0.8), -1.4, 1.8, -0.05, false);
-  // lumières de la pièce
-  const warm = new THREE.PointLight('#ffb070', 11, 9); warm.position.set(0, 2.5, 0.8); office.add(warm);
-  const glow = new THREE.PointLight('#9fd6ff', 7, 6); glow.position.set(0, 2.1, -1.2); office.add(glow);
-
-  // écran : fond d'écran du terminal + 3 icônes cliquables
-  const ICONS = [{ id: 'manga', x: 40, y: 56 }, { id: 'jeux', x: 40, y: 190 }, { id: 'musique', x: 40, y: 324 }];
-  const ICON_W = 130, ICON_H = 118;
-  const skyline = [];
-  { let s = 7; const r = () => { s = (s * 16807) % 2147483647; return s / 2147483647; }; for (let x = 150; x < SW; x += 30) skyline.push([x, 2 + Math.floor(r() * 4)]); }
-  let deskTab = 0, screenCursor = null, screenT = 0;
-  const rr = (x, y, w, h, r) => { sg.beginPath(); sg.roundRect(x, y, w, h, r); };
-  function drawScreen() {
-    const g = sg.createLinearGradient(0, 0, 0, SH);
-    g.addColorStop(0, '#26221e'); g.addColorStop(0.6, '#7a3d22'); g.addColorStop(1, '#e5561b');
-    sg.fillStyle = g; sg.fillRect(0, 0, SW, SH);
-    sg.fillStyle = '#f0b400'; sg.beginPath(); sg.arc(560, 300, 60, 0, 7); sg.fill();
-    sg.fillStyle = '#16150f';
-    skyline.forEach(([x, n]) => { for (let l = 0; l < n; l++) sg.fillRect(x, SH - 36 - (l + 1) * 22, 26, 20); });
-    sg.fillRect(612, 150, 6, SH - 186); sg.fillRect(560, 150, 130, 8); sg.fillRect(640, 158, 3, 70); sg.fillRect(628, 226, 28, 12);
-    ICONS.forEach((ic, i) => {
-      const on = i === deskTab;
-      sg.fillStyle = on ? 'rgba(255,255,255,.22)' : 'rgba(0,0,0,.18)'; rr(ic.x - 10, ic.y - 8, ICON_W, ICON_H, 6); sg.fill();
-      if (on) { sg.strokeStyle = '#ff5b14'; sg.lineWidth = 3; rr(ic.x - 10, ic.y - 8, ICON_W, ICON_H, 6); sg.stroke(); }
-      const cx = ic.x + 55, cy = ic.y + 40;
-      sg.fillStyle = '#f3efe4'; sg.strokeStyle = '#16150f'; sg.lineWidth = 3;
-      if (ic.id === 'manga') { sg.fillRect(cx - 28, cy - 34, 56, 70); sg.fillStyle = '#c9382a'; sg.fillRect(cx - 28, cy - 34, 10, 70); sg.fillStyle = '#16150f'; sg.fillRect(cx - 12, cy - 22, 32, 8); sg.fillRect(cx - 12, cy - 8, 24, 5); }
-      if (ic.id === 'jeux') { rr(cx - 38, cy - 18, 76, 40, 18); sg.fill(); sg.stroke(); sg.fillStyle = '#16150f'; sg.fillRect(cx - 26, cy - 3, 16, 5); sg.fillRect(cx - 21, cy - 8, 6, 15); sg.beginPath(); sg.arc(cx + 16, cy - 2, 5, 0, 7); sg.arc(cx + 27, cy + 6, 5, 0, 7); sg.fill(); }
-      if (ic.id === 'musique') { sg.lineWidth = 7; sg.strokeStyle = '#f3efe4'; sg.beginPath(); sg.arc(cx, cy + 4, 28, Math.PI, 0); sg.stroke(); sg.fillStyle = '#f3efe4'; rr(cx - 38, cy + 2, 16, 30, 5); sg.fill(); rr(cx + 22, cy + 2, 16, 30, 5); sg.fill(); }
-      sg.fillStyle = '#f3efe4'; sg.font = '500 17px "IBM Plex Mono", monospace'; sg.textAlign = 'center'; sg.textBaseline = 'alphabetic';
-      sg.fillText(ic.id, ic.x + 55, ic.y + 96);
-    });
-    // égaliseur
-    sg.fillStyle = 'rgba(0,0,0,.45)'; sg.fillRect(SW - 250, 24, 226, 110);
-    sg.fillStyle = '#f0b400';
-    const amp = deskTab === 2 ? 1 : 0.28;
-    for (let i = 0; i < 14; i++) { const h = (0.25 + 0.75 * Math.abs(Math.sin(screenT * 3 + i * 0.7) * Math.cos(screenT * 1.7 + i))) * 78 * amp + 4; sg.fillRect(SW - 238 + i * 15.5, 120 - h, 11, h); }
-    // barre des tâches
-    sg.fillStyle = '#16150f'; sg.fillRect(0, SH - 36, SW, 36);
-    sg.fillStyle = '#ff5b14'; sg.fillRect(8, SH - 30, 24, 24);
-    sg.fillStyle = '#f3efe4'; sg.font = '500 16px "IBM Plex Mono", monospace'; sg.textAlign = 'left'; sg.fillText('mon-bureau', 42, SH - 12);
-    const d = new Date(); sg.textAlign = 'right'; sg.fillText(String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'), SW - 12, SH - 12);
-    if (screenCursor) { const { x, y } = screenCursor; sg.fillStyle = '#fff'; sg.strokeStyle = '#16150f'; sg.lineWidth = 2; sg.beginPath(); sg.moveTo(x, y); sg.lineTo(x, y + 22); sg.lineTo(x + 6, y + 17); sg.lineTo(x + 11, y + 27); sg.lineTo(x + 15, y + 25); sg.lineTo(x + 10, y + 16); sg.lineTo(x + 17, y + 16); sg.closePath(); sg.fill(); sg.stroke(); }
-    screenTex.needsUpdate = true;
-  }
-  drawScreen();
+  const OX = 31, OZ = 19;
+  // ---------- portail temporel vers « chez moi »
+  const portal = new THREE.Group(); portal.position.set(OX, 0, OZ); scene.add(portal);
+  const [swc, swg] = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; return [c, c.getContext('2d')]; })();
+  { const bg = swg.createRadialGradient(128, 128, 4, 128, 128, 128); bg.addColorStop(0, '#fff3c0'); bg.addColorStop(0.35, '#7c3a20'); bg.addColorStop(1, '#0b0714'); swg.fillStyle = bg; swg.fillRect(0, 0, 256, 256);
+    for (let arm = 0; arm < 6; arm++) for (let i = 0; i < 120; i++) { const r = 4 + i * 1.0, a = arm * (Math.PI / 3) + i * 0.07; swg.fillStyle = arm % 2 ? `rgba(34,211,238,${0.5 - i / 260})` : `rgba(255,91,20,${0.55 - i / 240})`; swg.beginPath(); swg.arc(128 + Math.cos(a) * r, 128 + Math.sin(a) * r, 5 - i / 40, 0, 7); swg.fill(); } }
+  const swTex = new THREE.CanvasTexture(swc); swTex.colorSpace = THREE.SRGBColorSpace; swTex.center.set(0.5, 0.5);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(2.3, 48), new THREE.MeshBasicMaterial({ map: swTex, transparent: true, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+  disc.position.y = 3.2; portal.add(disc);
+  const ringM = new THREE.MeshStandardMaterial({ color: '#16150f', emissive: '#ff5b14', emissiveIntensity: 1.6, roughness: 0.5 });
+  const ring1 = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.22, 12, 48), ringM); ring1.position.y = 3.2; ring1.castShadow = true; portal.add(ring1);
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.07, 8, 48), new THREE.MeshStandardMaterial({ color: '#16150f', emissive: '#22d3ee', emissiveIntensity: 2 })); ring2.position.y = 3.2; portal.add(ring2);
+  for (const sx of [-1.6, 1.6]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.2, 0.8), new THREE.MeshStandardMaterial({ color: '#2b2b27', roughness: 0.7 })); leg.position.set(sx, 0.6, 0); leg.castShadow = true; portal.add(leg); }
+  const plinth = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.2, 1.4), new THREE.MeshStandardMaterial({ color: '#f0b400', roughness: 0.8 })); plinth.position.y = 0.1; portal.add(plinth);
+  const portalHit = disc; portalHit.userData.portal = true;
+  const portalLight = new THREE.PointLight('#ff7a3a', 6, 14); portalLight.position.set(0, 3, 2); portal.add(portalLight);
 
   // ---------- portique (RMG) : suit la souris, saisit les conteneurs
   const yellowM = new THREE.MeshStandardMaterial({ color: '#f0b400', roughness: 0.6, metalness: 0.2 });
@@ -390,7 +278,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   });
 
   const st = { gx: 36, tz: 8, sy: 9, rot: 0, sx: 1, mode: 'park', tgx: 36, ttz: 8 };
-  let held = null, heldItem = null, selected = null, busy = false, queued = null, deskOpen = false;
+  let held = null, heldItem = null, selected = null, busy = false, queued = null, world = 'yard';
 
   // ---------- caméra
   const V = (a) => new THREE.Vector3(...a);
@@ -472,7 +360,6 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     run(() => {
       const item = byId[id]; if (!item || item === selected) return;
       const prev = held;
-      if (deskOpen) { deskOpen = false; onDesk(false); }
       selected = item;
       sequence((tl) => { if (prev) tl.add(release()); tl.add(grab(item)); });
       flyItem(item); onSelect(item);
@@ -488,31 +375,42 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   }
 
 
-  // vue de face, à hauteur d'écran, décalée pour laisser la place à la fenêtre
-  function deskView() {
-    const target = new THREE.Vector3(OX, 2.15, OZ - 2.2);
-    const dir = new THREE.Vector3(0.16, 0.2, 1).normalize();
-    let dist = innerWidth / innerHeight < 1 ? 15 : 8.6;
-    const pos = target.clone().addScaledVector(dir, dist);
-    const right = new THREE.Vector3().crossVectors(dir.clone().negate(), camera.up).normalize();
-    const off = small() ? new THREE.Vector3(0, -dist * 0.12, 0) : right.multiplyScalar(dist * 0.2);
-    return { pos: pos.add(off), target: target.add(off) };
+  // ---------- monde « chez moi » : chambre de gamer (autre scène, même rendu)
+  const home = createHome();
+  const lofi = createLofi();
+  let homeHover = null, portalHover = false;
+  const YARD_CTL = { minDistance: 7, maxDistance: 95, minPolarAngle: 0.15, maxPolarAngle: 1.38, minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity };
+  const HOME_CTL = { minDistance: 0.6, maxDistance: 7, minPolarAngle: 0.45, maxPolarAngle: 1.8, minAzimuthAngle: -1.15, maxAzimuthAngle: 1.15 };
+  function setWorld(w) {
+    if (w === world) return;
+    gsap.killTweensOf(camera.position); gsap.killTweensOf(controls.target); arcTween?.kill();
+    if (w === 'home') {
+      if (held) { const u = held.userData; held.position.set(u.baseX, u.baseY, u.baseZ); held = null; heldItem = null; }
+      if (selected) { selected = null; onSelect(null); }
+      world = 'home';
+      Object.assign(controls, HOME_CTL);
+      camera.near = 0.05; camera.fov = 50; camera.updateProjectionMatrix();
+      camera.position.set(...HOME_VIEWS.home.pos); controls.target.set(...HOME_VIEWS.home.target);
+    } else {
+      world = 'yard';
+      lofi.stop(); homeHover = null;
+      Object.assign(controls, YARD_CTL);
+      camera.near = 0.5; camera.fov = 38; camera.updateProjectionMatrix();
+      const o = overviewView();
+      camera.position.copy(o.pos).add(new THREE.Vector3(18, 26, 40)); controls.target.copy(o.target);
+      st.mode = 'follow'; st.tgx = st.gx; st.ttz = st.tz;
+      overview(2.6);
+    }
+    controls.enabled = true;
   }
-  function openDesk() {
-    run(() => {
-      if (deskOpen) return;
-      if (selected) { selected = null; onSelect(null); sequence((tl) => { if (held) tl.add(release()); }); }
-      deskOpen = true; st.tgx = -20; st.ttz = 4;
-      onDesk(true);
-      flyArc(deskView(), 3.8, 16);
-    });
+  function focusHome(id) {
+    const v = HOME_VIEWS[id]; if (!v) return;
+    const pos = V(v.pos), target = V(v.target);
+    const fwd = target.clone().sub(pos).normalize(), dist = pos.distanceTo(target);
+    const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
+    const off = id === 'home' ? new THREE.Vector3() : small() ? new THREE.Vector3(0, -dist * 0.18, 0) : right.multiplyScalar(dist * 0.2);
+    flyTo({ pos: pos.add(off), target: target.add(off) }, 1.7);
   }
-  function closeDesk() {
-    if (!deskOpen) return;
-    deskOpen = false; screenCursor = null; drawScreen(); onDesk(false);
-    flyArc(overviewView(), 3.4, 14);
-  }
-  function setDeskTab(i) { deskTab = i; drawScreen(); }
 
   // ---------- pointeur : survol, clic, pilotage de la grue
   const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
@@ -527,15 +425,13 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     if (down && !dragging && e.target === canvas) {
       ptr.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
       ray.setFromCamera(ptr, camera);
-      const h = ray.intersectObjects(pickables, false)[0];
-      if (h) select(h.object.userData.item.id);
-      else if (deskOpen) {
-        const sh = ray.intersectObject(screenMesh, false)[0];
-        if (sh) {
-          const cx = sh.uv.x * SW, cy = (1 - sh.uv.y) * SH;
-          const i = ICONS.findIndex((ic) => cx >= ic.x - 10 && cx <= ic.x - 10 + ICON_W && cy >= ic.y - 8 && cy <= ic.y - 8 + ICON_H);
-          if (i >= 0) { setDeskTab(i); onDeskTab(i); }
-        }
+      if (world === 'home') {
+        const h = ray.intersectObjects(home.pickables, false)[0];
+        if (h) { if (h.object.userData.photo !== undefined) onPhoto(h.object.userData.photo); else onHomeHot(h.object.userData.hot); }
+      } else {
+        const h = ray.intersectObjects(pickables, false)[0];
+        if (h) select(h.object.userData.item.id);
+        else if (ray.intersectObject(portalHit, false)[0]) onPortal();
       }
     }
     down = null; dragging = false; canvas.style.cursor = hovered ? 'pointer' : 'grab';
@@ -554,7 +450,7 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
   addEventListener('resize', resize); resize();
 
   // ---------- boucle
-  let last = performance.now(), deskFrame = 0;
+  let last = performance.now(), elapsed = 0;
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     const k = 1 - Math.exp(-dt * 3.2);
@@ -562,21 +458,24 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     if (dirty && !dragging && lastEvt) {
       dirty = false;
       ray.setFromCamera(ptr, camera);
-      if (!deskOpen && st.mode === 'follow' && ray.ray.intersectPlane(plane, hit)) {
+      if (world === 'yard' && st.mode === 'follow' && ray.ray.intersectPlane(plane, hit)) {
         st.tgx = THREE.MathUtils.clamp(hit.x, -44, 44);
         st.ttz = THREE.MathUtils.clamp(hit.z, RAIL_Z0 + 2, RAIL_Z1 - 2);
       }
-      const h = lastEvt.pointerType === 'mouse' || lastEvt.pointerType === 'pen' ? ray.intersectObjects(pickables, false)[0] : null;
-      const m = h ? h.object : null;
-      if (m !== hovered) {
-        hovered = m;
-        canvas.style.cursor = m ? 'pointer' : 'grab';
-      }
-      onHover(hovered ? hovered.userData.item : null, lastEvt.clientX, lastEvt.clientY);
-      if (deskOpen) {
-        const sh = ray.intersectObject(screenMesh, false)[0];
-        screenCursor = sh ? { x: sh.uv.x * SW, y: (1 - sh.uv.y) * SH } : null;
-        if (sh && ICONS.some((ic) => sh.uv.x * SW >= ic.x - 10 && sh.uv.x * SW <= ic.x + ICON_W - 10 && (1 - sh.uv.y) * SH >= ic.y - 8 && (1 - sh.uv.y) * SH <= ic.y - 8 + ICON_H)) canvas.style.cursor = 'pointer';
+      const mouseLike = lastEvt.pointerType === 'mouse' || lastEvt.pointerType === 'pen';
+      if (world === 'home') {
+        const h = mouseLike ? ray.intersectObjects(home.pickables, false)[0] : null;
+        homeHover = h ? h.object.userData.hot : null;
+        canvas.style.cursor = h ? 'pointer' : 'grab';
+        onHover(h ? { title: HOT_LABEL[homeHover] || '', kind: 'home' } : null, lastEvt.clientX, lastEvt.clientY);
+      } else {
+        const h = mouseLike ? ray.intersectObjects(pickables, false)[0] : null;
+        const m = h ? h.object : null;
+        const ph = mouseLike && !m && ray.intersectObject(portalHit, false)[0];
+        if (m !== hovered) { hovered = m; }
+        portalHover = !!ph;
+        canvas.style.cursor = m || ph ? 'pointer' : 'grab';
+        onHover(m ? m.userData.item : ph ? { title: 'Chez moi', kind: 'portal' } : null, lastEvt.clientX, lastEvt.clientY);
       }
     }
 
@@ -597,17 +496,15 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
       for (const mat of m.userData.mats) { mat.emissive.set('#ff5b14'); mat.emissiveIntensity = m.userData.hover; }
     }
 
-    if (deskOpen) {
-      screenT += dt; deskFrame++;
-      const tx = screenCursor ? (screenCursor.x / SW - 0.5) * 0.7 : 0, tz = screenCursor ? (screenCursor.y / SH - 0.5) * 0.4 : 0;
-      mouse.position.x += (1.3 + tx - mouse.position.x) * 0.25; mouse.position.z += (-1.55 + tz - mouse.position.z) * 0.25;
-      if (deskFrame % 3 === 0) drawScreen();
-    }
+    elapsed += dt;
+    swTex.rotation -= dt * 0.7; ring2.rotation.z += dt * 0.9; ring1.material.emissiveIntensity = 1.4 + Math.sin(elapsed * 3) * 0.4; portalLight.intensity = 5 + Math.sin(elapsed * 2.2) * 1.5;
+    if (world === 'home') home.update(dt, elapsed, { hover: homeHover, music: lofi.playing, pulse: lofi.pulse() });
     controls.update();
     const t = controls.target;
-    t.x = THREE.MathUtils.clamp(t.x, -46, 46); t.y = THREE.MathUtils.clamp(t.y, 0, 14); t.z = THREE.MathUtils.clamp(t.z, -22, 34);
+    if (world === 'home') { t.x = THREE.MathUtils.clamp(t.x, -3.2, 3.2); t.y = THREE.MathUtils.clamp(t.y, 0.3, 2.6); t.z = THREE.MathUtils.clamp(t.z, -2.6, 2.2); }
+    else { t.x = THREE.MathUtils.clamp(t.x, -46, 46); t.y = THREE.MathUtils.clamp(t.y, 0, 14); t.z = THREE.MathUtils.clamp(t.z, -22, 34); }
 
-    const show = !selected && !deskOpen && st.mode !== 'park';
+    const show = world === 'yard' && !selected && st.mode !== 'park';
     for (const g of tagList) {
       tmp.copy(g.p).project(camera);
       const vis = show && tmp.z < 1 && Math.abs(tmp.x) < 1.1;
@@ -615,14 +512,16 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
       g.el.style.pointerEvents = vis ? 'auto' : 'none';
       g.el.style.transform = `translate(${((tmp.x * 0.5 + 0.5) * innerWidth).toFixed(1)}px, ${((-tmp.y * 0.5 + 0.5) * innerHeight).toFixed(1)}px) translate(-50%, -50%)`;
     }
-    renderer.render(scene, camera);
+    renderer.render(world === 'home' ? home.scene : scene, camera);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 
   return {
-    select, close, overview, flyZone, openDesk, closeDesk, setDeskTab,
-    get deskOpen() { return deskOpen; },
+    select, close, overview, flyZone, setWorld, focusHome,
+    toggleLofi: () => lofi.toggle(),
+    get world() { return world; },
+    get lofiPlaying() { return lofi.playing; },
     enter() { st.mode = 'follow'; overview(3); },
     get selected() { return selected; },
   };

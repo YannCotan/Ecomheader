@@ -26,8 +26,9 @@
       <button data-zone="parcours"><b>B</b> Parcours</button>
       <button data-zone="projets"><b>C</b> Projets</button>
       <button data-zone="formation"><b>D</b> Formation</button>
-      <button data-zone="bureau" class="nav__desk"><b>E</b> Mon bureau</button>
+      <button data-zone="bureau" class="nav__desk"><b>E</b> Chez moi</button>
       <button data-zone="gate"><b>↗</b> Contact</button>
+      <button data-action="back" class="nav__back">← Retour au terminal</button>
       <button data-action="about" class="nav__alt">Accueil</button>
       <button data-action="list" class="nav__alt">Vue liste</button>
     </nav>
@@ -59,32 +60,53 @@
     </aside>
 
     <aside class="panel desk" id="desk" aria-hidden="true" aria-labelledby="d-title">
-      <div class="win__bar mono"><i></i><i></i><i></i><span id="d-title">mon-bureau / hobbies</span><button class="close" id="d-close" aria-label="Quitter le bureau">Quitter ✕</button></div>
+      <div class="win__bar mono"><i></i><i></i><i></i><span id="d-title">chez-moi / 22:47</span><button class="close" id="d-close" aria-label="Fermer">Fermer ✕</button></div>
       <div class="panel__scroll">
         <div class="tabs mono" id="d-tabs" role="tablist"></div>
         <div id="d-body"></div>
-        <div class="pager mono"><span>Clique sur une icône de l'écran ou sur un onglet</span></div>
       </div>
     </aside>
 
     <section class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
       <div class="stripe"></div>
       <div class="intro__in">
-        <p class="mono intro__pass">Passe d'accès · Gate-in</p>
-        <h1 id="intro-title">Yann Cotan</h1>
+        <div class="intro__head">
+          <img class="intro__photo" id="intro-photo" alt="Yann Cotan, sur les rochers au bord de l'océan" width="132" height="132" />
+          <div>
+            <p class="mono intro__pass">Passe d'accès · Gate-in</p>
+            <h1 id="intro-title">Yann Cotan</h1>
+            <p class="mono intro__tag">25 ans · Abidjan · Fullstack</p>
+          </div>
+        </div>
         <p class="intro__lead">
           Je développe des applications web de bout en bout : interface, API, base de données et déploiement.
           Je travaille à Abidjan Terminal, d'où ce portfolio en forme de terminal à conteneurs.
         </p>
-        <p>Chaque conteneur renferme quelque chose : mes outils, mon parcours, mes projets. Pilote la grue avec la souris, clique pour en ouvrir un.</p>
+        <p>Chaque conteneur renferme quelque chose : mes outils, mon parcours, mes projets. Pilote la grue avec la souris, clique pour en ouvrir un. Et si tu veux voir qui je suis hors du code, prends le portail jusque chez moi.</p>
         <dl class="mono">
-          <div><dt>Fonction</dt><dd>Développeur web fullstack</dd></div>
           <div><dt>Poste actuel</dt><dd>CDI, Abidjan Terminal</dd></div>
           <div><dt>Missions</dt><dd>Freelance : disponible</dd></div>
+          <div><dt>Hors code</dt><dd>Jeux, voitures, musique, voyages</dd></div>
         </dl>
-        <button class="go" id="go">Entrer dans le terminal →</button>
+        <div class="intro__cta">
+          <button class="go" id="go">Entrer dans le terminal →</button>
+          <button class="go go--ghost" id="go-contact">Me contacter</button>
+        </div>
       </div>
     </section>
+
+    <button class="cta" id="cta">Un projet ? Parlons-en <span>→</span></button>
+
+    <div class="warp" id="warp" aria-hidden="true">
+      <canvas id="warp-c"></canvas>
+      <div class="warp__clock mono" id="warp-clock">14:32</div>
+      <div class="warp__label mono" id="warp-label"></div>
+    </div>
+
+    <div class="lightbox" id="lightbox" hidden role="dialog" aria-label="Photo">
+      <figure><img id="lb-img" alt="" /><figcaption class="mono" id="lb-cap"></figcaption></figure>
+      <button class="close" id="lb-close">Fermer ✕</button>
+    </div>
 
     <div class="loader" id="loader"><div class="mono">Chargement du terminal</div><i></i></div>
   </div>
