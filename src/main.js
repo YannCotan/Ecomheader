@@ -1,7 +1,7 @@
 import './style.css';
 import gsap from 'gsap';
 import { createYard } from './yard.js';
-import { items, profile, zoneMeta, kindLabel } from './data.js';
+import { items, profile, zoneMeta, kindLabel, hobbies } from './data.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -21,13 +21,16 @@ function contactLines() {
     profile.linkedin && `<a href="${esc(profile.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`,
   ].filter(Boolean);
 }
+function listEntries(z) {
+  return z === 'bureau' ? hobbies.map((h) => ({ title: h.label, sub: 'Hobby', body: [h.text], kind: 'hobby' })) : items.filter((i) => i.zone === z);
+}
 $('#list-body').innerHTML = `
   <h1>${esc(profile.name)}</h1>
   <p class="mono">Développeur web fullstack · Abidjan · Disponible en freelance</p>
   ${zoneKeys.map((z) => `
     <section>
       <h2><span class="mono">${esc(zoneMeta[z].tag)}</span> ${esc(zoneMeta[z].name)}</h2>
-      ${items.filter((i) => i.zone === z).map((i) => `
+      ${listEntries(z).map((i) => `
         <article>
           <h3>${esc(i.title)}</h3>
           <p class="mono">${esc([i.sub, i.period].filter(Boolean).join(' · '))}</p>
@@ -99,12 +102,35 @@ document.addEventListener('click', (e) => {
   });
 });
 
+let inDesk = false;
+const deskEl = $('#desk');
+function syncPanelState() { document.body.classList.toggle('has-panel', !!current || inDesk); }
+let deskTab = 0;
+function renderDesk() {
+  $('#d-tabs').innerHTML = hobbies.map((h, i) => `<button role="tab" aria-selected="${i === deskTab}" data-tab="${i}">${esc(h.label)}</button>`).join('');
+  const h = hobbies[deskTab];
+  $('#d-body').innerHTML = `<h2>${esc(h.label)}</h2><div class="body"><p>${esc(h.text)}</p></div>
+    ${h.picks.length ? `<ul class="picks">${h.picks.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : '<p class="mono soon">Mes favoris arrivent bientôt.</p>'}`;
+}
+function showDesk(open) {
+  inDesk = open;
+  deskEl.classList.toggle('open', open);
+  deskEl.setAttribute('aria-hidden', String(!open));
+  syncPanelState();
+  if (open) { renderDesk(); tip.hidden = true; }
+}
+$('#d-tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  deskTab = +b.dataset.tab; yard?.setDeskTab(deskTab); renderDesk();
+});
+$('#d-close').addEventListener('click', () => yard?.closeDesk());
+
 function showPanel(item) {
   current = item;
   const open = !!item;
   panel.classList.toggle('open', open);
   panel.setAttribute('aria-hidden', String(!open));
-  document.body.classList.toggle('has-panel', open);
+  syncPanelState();
   if (open) { renderPanel(item); panel.querySelector('.panel__scroll').scrollTop = 0; $('#p-close').focus({ preventScroll: true }); }
   tip.hidden = true;
 }
@@ -121,25 +147,30 @@ $('#p-prev').addEventListener('click', () => near(-1));
 $('#p-next').addEventListener('click', () => near(1));
 $('#p-close').addEventListener('click', () => yard?.close());
 addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { if (!listEl.hidden) closeList(); else yard?.close(); }
-  else if (e.key === 'ArrowRight') near(1);
-  else if (e.key === 'ArrowLeft') near(-1);
+  if (e.key === 'Escape') { if (!listEl.hidden) closeList(); else if (inDesk) yard.closeDesk(); else yard?.close(); }
+  else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const d = e.key === 'ArrowRight' ? 1 : -1;
+    if (inDesk) { deskTab = (deskTab + d + hobbies.length) % hobbies.length; yard.setDeskTab(deskTab); renderDesk(); }
+    else near(d);
+  }
 });
 
 /* ---------- navigation ---------- */
 function goZone(z) {
   if (!yard) return openList();
-  if (current) { yard.close(); }
-  setTimeout(() => yard.flyZone(z), current ? 50 : 0);
+  if (inDesk) yard.closeDesk();
+  else if (current) yard.close();
+  setTimeout(() => yard.flyZone(z), current || inDesk ? 50 : 0);
 }
 $$('[data-zone]').forEach((b) => b.addEventListener('click', () => {
   const z = b.dataset.zone;
-  if (z === 'gate') yard ? yard.select('contact') : openList();
+  if (z === 'bureau') yard ? yard.openDesk() : openList();
+  else if (z === 'gate') yard ? yard.select('contact') : openList();
   else goZone(z);
 }));
 $('[data-action="list"]').addEventListener('click', openList);
 $('[data-action="about"]').addEventListener('click', () => {
-  yard?.close();
+  if (inDesk) yard.closeDesk(); else yard?.close();
   introEl.classList.remove('gone');
   gsap.fromTo(introEl, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' });
 });
@@ -157,6 +188,8 @@ function init() {
     yard = createYard({
       canvas, items, tagEls, reduced,
       onSelect: showPanel,
+      onDesk: showDesk,
+      onDeskTab: (i) => { deskTab = i; renderDesk(); },
       onHover: (item, x, y) => {
         if (!item || current) { tip.hidden = true; return; }
         tip.hidden = false;

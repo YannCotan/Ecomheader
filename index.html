@@ -26,6 +26,7 @@
       <button data-zone="parcours"><b>B</b> Parcours</button>
       <button data-zone="projets"><b>C</b> Projets</button>
       <button data-zone="formation"><b>D</b> Formation</button>
+      <button data-zone="bureau" class="nav__desk"><b>E</b> Mon bureau</button>
       <button data-zone="gate"><b>↗</b> Contact</button>
       <button data-action="about" class="nav__alt">Accueil</button>
       <button data-action="list" class="nav__alt">Vue liste</button>
@@ -54,6 +55,15 @@
           <button id="p-next">Suivant →</button>
         </div>
         <svg class="barcode" id="p-barcode" height="38" aria-hidden="true"></svg>
+      </div>
+    </aside>
+
+    <aside class="panel desk" id="desk" aria-hidden="true" aria-labelledby="d-title">
+      <div class="win__bar mono"><i></i><i></i><i></i><span id="d-title">mon-bureau / hobbies</span><button class="close" id="d-close" aria-label="Quitter le bureau">Quitter ✕</button></div>
+      <div class="panel__scroll">
+        <div class="tabs mono" id="d-tabs" role="tablist"></div>
+        <div id="d-body"></div>
+        <div class="pager mono"><span>Clique sur une icône de l'écran ou sur un onglet</span></div>
       </div>
     </aside>
 

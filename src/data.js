@@ -15,7 +15,15 @@ export const zoneMeta = {
   projets: { tag: 'C', name: 'Projets', blurb: 'Réalisations.' },
   formation: { tag: 'D', name: 'Formation', blurb: 'Diplômes et certification.' },
   gate: { tag: '↗', name: 'Contact', blurb: 'Pour une mission ou une question.' },
+  bureau: { tag: 'E', name: 'Mon bureau', blurb: 'Ce que j\'aime en dehors du code.' },
 };
+
+// Hobbies affichés sur l'ordinateur du bureau. `picks` : tes favoris (titres, artistes, jeux), à compléter.
+export const hobbies = [
+  { id: 'manga', label: 'Manga & anime', text: 'J\'aime regarder des mangas. C\'est ma façon de décrocher après une journée de code.', picks: [] },
+  { id: 'jeux', label: 'Jeux vidéo', text: 'Je joue pendant mon temps libre : un bon moyen de réfléchir autrement aux systèmes et à leurs règles.', picks: [] },
+  { id: 'musique', label: 'Musique', text: 'J\'écoute de la musique en continu, surtout quand je code.', picks: [] },
+];
 
 export const kindLabel = {
   outil: 'Outil',
@@ -59,9 +67,9 @@ export const items = [
   { id: 'at-cdi', zone: 'parcours', kind: 'experience', title: 'Développeur et assistance métier', sub: 'Abidjan Terminal', period: '2026 · CDI · poste actuel', color: C.orange, body: ['Développement et assistance auprès des équipes métier.'], tags: ['Poste actuel'] },
 
   // ---- Zone C : projets (emplacements à remplir avec tes vrais projets)
-  { id: 'p1', zone: 'projets', kind: 'projet', title: 'Projet à venir', sub: 'Emplacement réservé', color: C.orange, size: 40, body: ['Cet emplacement accueillera un projet : le problème, le rôle, la stack et le résultat.'], tags: ['À renseigner'] },
-  { id: 'p2', zone: 'projets', kind: 'projet', title: 'Projet à venir', sub: 'Emplacement réservé', color: C.blue, size: 40, body: ['Cet emplacement accueillera un projet : le problème, le rôle, la stack et le résultat.'], tags: ['À renseigner'] },
-  { id: 'p3', zone: 'projets', kind: 'projet', title: 'Projet à venir', sub: 'Emplacement réservé', color: C.green, size: 40, body: ['Cet emplacement accueillera un projet : le problème, le rôle, la stack et le résultat.'], tags: ['À renseigner'] },
+  { id: 'p1', zone: 'projets', kind: 'projet', title: 'Gestion Achat', sub: 'Abidjan Terminal', period: 'Application interne', color: C.orange, size: 40, body: ['Application de gestion des demandes d\'achat, conçue et développée pour Abidjan Terminal.', 'Elle suit les demandes de bout en bout, des proformas jusqu\'aux commandes.'], tags: ['PHP', 'Gestion', 'Application interne'] },
+  { id: 'p2', zone: 'projets', kind: 'projet', title: 'Safe Deal', sub: 'Startup · en cours de création', period: 'En cours', color: C.blue, size: 40, body: ['Startup que je suis en train de monter.', 'Plus de détails bientôt.'], tags: ['Startup', 'En cours'] },
+  { id: 'p3', zone: 'projets', kind: 'projet', title: 'Projet à venir', sub: 'Emplacement réservé', color: C.green, size: 40, body: ['Cet emplacement accueillera un prochain projet.'], tags: ['À venir'] },
 
   // ---- Zone D : formation
   { id: 'licence', zone: 'formation', kind: 'formation', title: 'Licence Pro Génie Logiciel', sub: 'Institut Booster', period: '2023', color: C.navy, body: ['Licence professionnelle en génie logiciel.'], tags: ['Licence'] },
