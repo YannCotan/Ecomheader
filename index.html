@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terminal Cotan</title>
+  <meta name="description" content="Portfolio de Yann Cotan, développeur web fullstack à Abidjan, présenté comme un terminal à conteneurs en 3D. Disponible pour des missions freelance." />
+  <meta name="theme-color" content="#d8d3c6" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' fill='%23ff5b14'/><rect x='8' y='14' width='48' height='36' fill='%2316150f'/><path d='M8 24h48M8 40h48' stroke='%23f4b400' stroke-width='3'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="pre-entry">
+  <canvas id="yard" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+
+  <div class="hud" id="hud">
+    <header class="plate">
+      <div class="plate__name">YANN COTAN</div>
+      <div class="plate__role mono">Développeur web fullstack · Abidjan</div>
+      <div class="plate__status mono"><i></i> Disponible en freelance</div>
+    </header>
+
+    <nav class="nav" aria-label="Zones du terminal">
+      <button data-zone="stack"><b>A</b> Stack</button>
+      <button data-zone="parcours"><b>B</b> Parcours</button>
+      <button data-zone="projets"><b>C</b> Projets</button>
+      <button data-zone="formation"><b>D</b> Formation</button>
+      <button data-zone="bureau" class="nav__desk"><b>E</b> Chez moi</button>
+      <button data-zone="gate"><b>↗</b> Contact</button>
+      <button data-action="back" class="nav__back">← Retour au terminal</button>
+      <button data-action="about" class="nav__alt">Accueil</button>
+      <button data-action="list" class="nav__alt">Version classique</button>
+    </nav>
+
+    <div class="zonetags" id="zonetags" aria-hidden="true"></div>
+
+    <p class="hint mono" id="hint">Glisser : tourner · Molette : zoom · Clic droit : déplacer · Clic sur un conteneur : l'ouvrir</p>
+    <div class="tip mono" id="tip" hidden></div>
+
+    <aside class="panel" id="panel" aria-hidden="true" aria-labelledby="p-title">
+      <div class="stripe"></div>
+      <div class="panel__scroll">
+        <div class="panel__top">
+          <span class="kind mono" id="p-kind"></span>
+          <button class="close" id="p-close" aria-label="Fermer le conteneur">Fermer ✕</button>
+        </div>
+        <div class="iso mono" id="p-iso"></div>
+        <h2 id="p-title"></h2>
+        <p class="sub" id="p-sub"></p>
+        <div class="body" id="p-body"></div>
+        <ul class="tags mono" id="p-tags"></ul>
+        <div class="pager mono">
+          <button id="p-prev">← Précédent</button>
+          <span id="p-count"></span>
+          <button id="p-next">Suivant →</button>
+        </div>
+        <svg class="barcode" id="p-barcode" height="38" aria-hidden="true"></svg>
+      </div>
+    </aside>
+
+    <aside class="panel desk" id="desk" aria-hidden="true" aria-labelledby="d-title">
+      <div class="win__bar mono"><i></i><i></i><i></i><span id="d-title">chez-moi / 22:47</span><button class="close" id="d-close" aria-label="Fermer">Fermer ✕</button></div>
+      <div class="panel__scroll">
+        <div class="tabs mono" id="d-tabs" role="tablist"></div>
+        <div id="d-body"></div>
+      </div>
+    </aside>
+
+    <section class="intro" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+      <div class="stripe"></div>
+      <div class="intro__in">
+        <div class="intro__head">
+          <img class="intro__photo" id="intro-photo" alt="Yann Cotan, sur les rochers au bord de l'océan" width="132" height="132" />
+          <div>
+            <p class="mono intro__pass">Passe d'accès · Gate-in</p>
+            <h1 id="intro-title">Yann Cotan</h1>
+            <p class="mono intro__tag">25 ans · Abidjan · Fullstack</p>
+          </div>
+        </div>
+        <p class="intro__lead">
+          Je développe des applications web de bout en bout : interface, API, base de données et déploiement.
+          Je travaille à Abidjan Terminal, d'où ce portfolio en forme de terminal à conteneurs.
+        </p>
+        <p>Chaque conteneur renferme quelque chose : mes outils, mon parcours, mes projets. Pilote la grue avec la souris, clique pour en ouvrir un. Et si tu veux voir qui je suis hors du code, prends le portail jusque chez moi.</p>
+        <dl class="mono">
+          <div><dt>Poste actuel</dt><dd>CDI, Abidjan Terminal</dd></div>
+          <div><dt>Missions</dt><dd>Freelance : disponible</dd></div>
+          <div><dt>Hors code</dt><dd>Jeux, voitures, musique, voyages</dd></div>
+        </dl>
+        <div class="intro__cta">
+          <button class="go" id="go">Entrer dans le terminal →</button>
+          <button class="go go--ghost" id="go-contact">Me contacter</button>
+        </div>
+        <p class="intro__cv mono"><a href="cv-yann-cotan.pdf" download="CV-Yann-Cotan.pdf" target="_blank" rel="noopener">↓ Télécharger mon CV (PDF)</a></p>
+      </div>
+    </section>
+
+    <button class="cta" id="cta">Un projet ? Parlons-en <span>→</span></button>
+
+    <div class="warp" id="warp" aria-hidden="true">
+      <canvas id="warp-c"></canvas>
+      <div class="warp__clock mono" id="warp-clock">14:32</div>
+      <div class="warp__label mono" id="warp-label"></div>
+    </div>
+
+    <div class="loader" id="loader"><div class="mono">Chargement du terminal</div><i></i></div>
+  </div>
+
+  <section class="list" id="list" aria-label="Portfolio en version classique" hidden>
+    <div id="list-body"></div>
+  </section>
+
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-label="Photo">
+    <figure><img id="lb-img" alt="" /><figcaption class="mono" id="lb-cap"></figcaption></figure>
+    <button class="close" id="lb-close">Fermer ✕</button>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
