@@ -204,19 +204,17 @@ a { color: inherit; }
   .plate { padding: 8px 12px; }
   .plate__name { font-size: 22px; }
   .plate__role { display: none; }
-  .nav { top: auto; bottom: calc(var(--gap) + 44px); left: 0; right: 0; max-width: none; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px var(--gap) 6px; scrollbar-width: none; }
+  .nav { top: auto; bottom: calc(var(--gap) + 10px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; max-width: none; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px var(--gap) 6px; scrollbar-width: none; }
   .nav button { white-space: nowrap; flex: none; }
   .hint { display: none; }
   .ztag { display: none; }
-  .panel { top: auto; left: var(--gap); width: auto; height: 48vh; bottom: calc(var(--gap) + 44px); transform: translateY(calc(100% + 80px)); box-shadow: 5px 5px 0 rgba(22,21,15,.28); }
+  .panel { top: auto; left: var(--gap); width: auto; height: min(60vh, 460px); bottom: calc(var(--gap) + 10px + env(safe-area-inset-bottom, 0px)); transform: translateY(calc(100% + 80px)); box-shadow: 5px 5px 0 rgba(22,21,15,.28); }
   .panel.open { transform: none; }
   .has-panel .nav { opacity: 0; pointer-events: none; }
-  .has-panel .panel { bottom: var(--gap); }
   .desk .pager { display: none; }
   .intro__in { padding: 18px 20px 22px; }
   .intro__photo { width: 96px; height: 96px; }
-  .cta { bottom: calc(var(--gap) + 44px); right: var(--gap); font-size: 17px; }
-  .at-home .nav { bottom: var(--gap); }
+  .cta { bottom: calc(var(--gap) + 62px + env(safe-area-inset-bottom, 0px)); right: var(--gap); font-size: 16px; padding: 6px 14px 4px; box-shadow: 4px 4px 0 var(--ink); }
   .intro__lead { font-size: 17px; }
   .intro dl div { grid-template-columns: 96px 1fr; }
 }
