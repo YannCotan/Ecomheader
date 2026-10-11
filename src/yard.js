@@ -505,6 +505,11 @@ export function createYard({ canvas, items, tagEls, reduced, onHover, onSelect, 
     if (world === 'home') home.update(dt, elapsed, { hover: homeHover, music: lofi.playing, pulse: lofi.pulse() });
     controls.update();
     const t = controls.target;
+    if (world === 'home') {
+      // la caméra reste dans la pièce (3 murs, sol) : jamais derrière un mur
+      const c = camera.position;
+      c.x = THREE.MathUtils.clamp(c.x, -2.95, 2.95); c.y = THREE.MathUtils.clamp(c.y, 0.25, 2.7); c.z = THREE.MathUtils.clamp(c.z, -2.35, 5);
+    }
     if (world === 'home') { t.x = THREE.MathUtils.clamp(t.x, -3.2, 3.2); t.y = THREE.MathUtils.clamp(t.y, 0.3, 2.6); t.z = THREE.MathUtils.clamp(t.z, -2.6, 2.2); }
     else { t.x = THREE.MathUtils.clamp(t.x, -46, 46); t.y = THREE.MathUtils.clamp(t.y, 0, 14); t.z = THREE.MathUtils.clamp(t.z, -22, 34); }
 
