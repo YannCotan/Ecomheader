@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { createYard } from './yard.js';
 import { PHOTOS } from './home.js';
 import portrait from './photos/portrait.jpg?inline';
+import { iconSvg } from './techicons.js';
 import { items, profile, zoneMeta, kindLabel, hobbies, about } from './data.js';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -12,6 +13,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (reduced) gsap.globalTimeline.timeScale(8);
 
 const zoneKeys = Object.keys(zoneMeta);
+const tagHtml = (t) => `${iconSvg(t, 15)}<span>${esc(t)}</span>`;
 $('#intro-photo').src = portrait;
 
 /* ---------- version classique : un portfolio « normal », même thème ---------- */
@@ -21,7 +23,7 @@ function stackCards() {
   const tools = byZone('stack');
   return STACK_ORDER.map(([label, subs]) => {
     const list = tools.filter((t) => subs.includes(t.sub));
-    return list.length ? `<div class="c-card"><h3 class="mono">${esc(label)}</h3><div class="c-chips">${list.map((t) => `<span title="${esc(t.body[0])}">${esc(t.title)}</span>`).join('')}</div></div>` : '';
+    return list.length ? `<div class="c-card"><h3 class="mono">${esc(label)}</h3><div class="c-chips">${list.map((t) => `<span title="${esc(t.body[0])}">${iconSvg(t.title, 18)}${esc(t.title)}</span>`).join('')}</div></div>` : '';
   }).join('');
 }
 function renderClassic() {
@@ -31,7 +33,7 @@ function renderClassic() {
     const free = p.title === 'Projet à venir';
     return `<article class="c-proj${free ? ' is-free' : ''}" style="--c:${esc(p.color)}"><div class="c-proj__bar"></div>
       <p class="mono c-proj__sub">${esc([p.sub, p.period].filter(Boolean).join(' · '))}</p><h3>${esc(p.title)}</h3>
-      ${p.body.map((b) => `<p>${esc(b)}</p>`).join('')}<ul class="c-tags mono">${p.tags.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></article>`;
+      ${p.body.map((b) => `<p>${esc(b)}</p>`).join('')}${p.link ? `<a class="c-btn c-btn--ghost c-proj__link" href="${esc(p.link)}" target="_blank" rel="noopener">Voir le site ↗</a>` : ''}<ul class="c-tags mono">${p.tags.map((t) => `<li>${tagHtml(t)}</li>`).join('')}</ul></article>`;
   }).join('');
   const exp = byZone('parcours').slice().reverse().map((e) => `<li class="c-tl"><p class="mono c-tl__when">${esc(e.period)}</p><h3>${esc(e.title)}</h3><p class="c-tl__org">${esc(e.sub)}</p><p>${esc(e.body.join(' '))}</p></li>`).join('');
   const edu = byZone('formation').map((e) => `<div class="c-card c-edu"><p class="mono">${esc(e.period || e.sub)}</p><h3>${esc(e.title)}</h3><p>${esc(e.period ? e.sub : '')}</p></div>`).join('');
@@ -138,6 +140,8 @@ function renderPanel(item) {
   $('#p-title').textContent = item.title;
   $('#p-sub').textContent = [item.sub, item.period].filter(Boolean).join(' · ');
   let body = item.body.map((b) => `<p>${esc(b)}</p>`).join('');
+  if (item.kind === 'outil' && iconSvg(item.title)) body = `<div class="logo-big">${iconSvg(item.title, 56)}</div>` + body;
+  if (item.link) body += `<a class="p-link mono" href="${esc(item.link)}" target="_blank" rel="noopener">Voir le site ↗</a>`;
   if (item.kind === 'contact') {
     body += `<div class="contact">
       <div class="row"><span class="mono">E-mail</span><a href="mailto:${esc(profile.email)}" id="mail">${esc(profile.email)}</a><button class="copy mono" data-copy="${esc(profile.email)}">Copier</button></div>
@@ -148,7 +152,7 @@ function renderPanel(item) {
     </div>`;
   }
   $('#p-body').innerHTML = body;
-  $('#p-tags').innerHTML = item.tags.map((t) => `<li>${esc(t)}</li>`).join('');
+  $('#p-tags').innerHTML = item.tags.map((t) => `<li>${tagHtml(t)}</li>`).join('');
   $('#p-count').textContent = `${idx + 1} / ${list.length}`;
   $('.pager').style.visibility = list.length > 1 ? 'visible' : 'hidden';
   const bc = barcode(item.iso);
