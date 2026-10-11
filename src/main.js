@@ -14,40 +14,82 @@ if (reduced) gsap.globalTimeline.timeScale(8);
 const zoneKeys = Object.keys(zoneMeta);
 $('#intro-photo').src = portrait;
 
-/* ---------- vue liste (contenu complet en HTML simple, aussi utilisé si WebGL est absent) ---------- */
-function contactLines() {
-  return [
-    `<a href="mailto:${esc(profile.email)}">${esc(profile.email)}</a>`,
-    `<span>${esc(profile.phone)}</span>`,
-    profile.github && `<a href="${esc(profile.github)}" target="_blank" rel="noopener">GitHub</a>`,
-    profile.linkedin && `<a href="${esc(profile.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`,
-  ].filter(Boolean);
+/* ---------- version classique : un portfolio « normal », même thème ---------- */
+const STACK_ORDER = [['Front-end', ['Front-end']], ['Back-end', ['Back-end']], ['Données', ['Données']], ['Infrastructure', ['Infrastructure']], ['Langages', ['Langage']], ['Créatif', ['3D', 'Animation']]];
+const byZone = (z) => items.filter((i) => i.zone === z);
+function stackCards() {
+  const tools = byZone('stack');
+  return STACK_ORDER.map(([label, subs]) => {
+    const list = tools.filter((t) => subs.includes(t.sub));
+    return list.length ? `<div class="c-card"><h3 class="mono">${esc(label)}</h3><div class="c-chips">${list.map((t) => `<span title="${esc(t.body[0])}">${esc(t.title)}</span>`).join('')}</div></div>` : '';
+  }).join('');
 }
-function listEntries(z) {
-  return z === 'bureau' ? hobbies.map((h) => ({ title: h.label, sub: 'Hors code', body: [h.text.replace(/ Clique[^.]*\./, '')], kind: 'hobby' })) : items.filter((i) => i.zone === z);
+function renderClassic() {
+  const mail = esc(profile.email);
+  const github = profile.github ? `<a class="c-btn c-btn--ghost" href="${esc(profile.github)}" target="_blank" rel="noopener">GitHub ↗</a>` : '';
+  const projects = byZone('projets').map((p) => {
+    const free = p.title === 'Projet à venir';
+    return `<article class="c-proj${free ? ' is-free' : ''}" style="--c:${esc(p.color)}"><div class="c-proj__bar"></div>
+      <p class="mono c-proj__sub">${esc([p.sub, p.period].filter(Boolean).join(' · '))}</p><h3>${esc(p.title)}</h3>
+      ${p.body.map((b) => `<p>${esc(b)}</p>`).join('')}<ul class="c-tags mono">${p.tags.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></article>`;
+  }).join('');
+  const exp = byZone('parcours').slice().reverse().map((e) => `<li class="c-tl"><p class="mono c-tl__when">${esc(e.period)}</p><h3>${esc(e.title)}</h3><p class="c-tl__org">${esc(e.sub)}</p><p>${esc(e.body.join(' '))}</p></li>`).join('');
+  const edu = byZone('formation').map((e) => `<div class="c-card c-edu"><p class="mono">${esc(e.period || e.sub)}</p><h3>${esc(e.title)}</h3><p>${esc(e.period ? e.sub : '')}</p></div>`).join('');
+  const hob = hobbies.map((h) => `<div class="c-card"><h3>${esc(h.label)}</h3><p>${esc(h.plain || h.text)}</p></div>`).join('');
+  const photos = PHOTOS.map((p, i) => `<button class="c-photo" data-photo="${i}" aria-label="Agrandir : ${esc(p.caption)}"><img src="${p.src}" alt="${esc(p.caption)}" loading="lazy" /></button>`).join('');
+  return `
+  <header class="c-head">
+    <a class="c-brand" href="#c-top"><b>YANN COTAN</b></a>
+    <nav class="c-nav" aria-label="Sections">
+      <a href="#c-about">À propos</a><a href="#c-stack">Stack</a><a href="#c-projets">Projets</a><a href="#c-parcours">Parcours</a><a href="#c-formation">Formation</a><a href="#c-hobbies">Hors code</a>
+    </nav>
+    <div class="c-head__act"><button class="c-btn c-btn--ghost" id="list-close">← Version 3D</button><a class="c-btn" href="#c-contact">Me contacter</a></div>
+  </header>
+  <main id="c-top">
+    <section class="c-hero">
+      <div class="c-hero__txt">
+        <p class="c-badge mono"><i></i> Disponible en freelance</p>
+        <h1>Développeur web <em>fullstack</em> à Abidjan.</h1>
+        <p class="c-lead">${esc(about.line)} Je construis des applications de bout en bout : interface, API, base de données et déploiement.</p>
+        <div class="c-cta"><a class="c-btn" href="#c-projets">Voir mes projets</a><a class="c-btn c-btn--ghost" href="#c-contact">Me contacter</a>${github}</div>
+        <dl class="c-facts mono"><div><dt>Poste actuel</dt><dd>CDI, Abidjan Terminal</dd></div><div><dt>Âge</dt><dd>${about.age} ans</dd></div><div><dt>Langues</dt><dd>Français, anglais</dd></div></dl>
+      </div>
+      <figure class="c-hero__fig"><img src="${portrait}" alt="Yann Cotan" width="420" height="420" /><figcaption class="mono">YCTU 305438 3 · 22G1</figcaption></figure>
+    </section>
+
+    <section class="c-sec" id="c-about"><p class="c-label mono"><b>A</b> À propos</p>
+      <div class="c-about"><h2>Du navigateur au serveur.</h2>
+      <div><p>Jeune développeur web, passionné par l'IT et les nouvelles technologies. BTS en Informatique Développeur d'Application, Licence Professionnelle en Génie Logiciel, certifié ITIL 4 Foundation.</p>
+      <p>Mon moteur : trouver des solutions créatives à des problèmes complexes et contribuer à des projets qui comptent. Je travaille aujourd'hui à Abidjan Terminal et je prends des missions freelance.</p></div></div>
+    </section>
+
+    <section class="c-sec" id="c-stack"><p class="c-label mono"><b>B</b> Stack</p><h2>Mes outils.</h2><div class="c-grid">${stackCards()}</div></section>
+    <section class="c-sec" id="c-projets"><p class="c-label mono"><b>C</b> Projets</p><h2>Réalisations.</h2><div class="c-grid c-grid--proj">${projects}</div></section>
+    <section class="c-sec" id="c-parcours"><p class="c-label mono"><b>D</b> Parcours</p><h2>Là où j'ai travaillé.</h2><ol class="c-timeline">${exp}</ol></section>
+    <section class="c-sec" id="c-formation"><p class="c-label mono"><b>E</b> Formation</p><h2>Diplômes et certification.</h2><div class="c-grid">${edu}</div></section>
+    <section class="c-sec" id="c-hobbies"><p class="c-label mono"><b>F</b> Hors code</p><h2>Qui je suis, le reste du temps.</h2>
+      <div class="c-grid c-grid--hob">${hob}</div><div class="c-photos">${photos}</div></section>
+
+    <section class="c-contact" id="c-contact">
+      <div class="c-contact__in"><p class="c-label mono"><b>↗</b> Contact</p>
+        <h2>Un projet ? Parlons-en.</h2>
+        <p>Missions freelance, collaborations, questions : écris-moi, je réponds.</p>
+        <div class="c-contact__row"><a class="c-mail" href="mailto:${mail}">${mail}</a><button class="copy mono" data-copy="${mail}">Copier</button></div>
+        <p class="mono c-contact__line">${esc(profile.phone)} · Abidjan, Côte d'Ivoire</p>
+        <div class="c-cta">${profile.github ? `<a class="c-btn c-btn--light" href="${esc(profile.github)}" target="_blank" rel="noopener">GitHub ↗</a>` : ''}${profile.linkedin ? `<a class="c-btn c-btn--light" href="${esc(profile.linkedin)}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}</div>
+      </div>
+    </section>
+  </main>
+  <footer class="c-foot mono"><span>© ${new Date().getFullYear()} Yann Cotan</span><span>Abidjan, Côte d'Ivoire</span></footer>`;
 }
-$('#list-body').innerHTML = `
-  <div class="list__me"><img src="${portrait}" alt="Yann Cotan" width="96" height="96" /><div>
-    <h1>${esc(profile.name)}</h1>
-    <p class="mono">${esc(about.line)}</p>
-    <p class="mono">Développeur web fullstack · Abidjan · Disponible en freelance</p>
-  </div></div>
-  ${zoneKeys.map((z) => `
-    <section>
-      <h2><span class="mono">${esc(zoneMeta[z].tag)}</span> ${esc(zoneMeta[z].name)}</h2>
-      ${listEntries(z).map((i) => `
-        <article>
-          <h3>${esc(i.title)}</h3>
-          <p class="mono">${esc([i.sub, i.period].filter(Boolean).join(' · '))}</p>
-          ${i.body.map((b) => `<p>${esc(b)}</p>`).join('')}
-          ${i.kind === 'contact' ? `<p class="clist">${contactLines().join(' · ')}</p>` : ''}
-        </article>`).join('')}
-    </section>`).join('')}`;
+$('#list-body').innerHTML = renderClassic();
+$('#list-body').addEventListener('click', (e) => { const b = e.target.closest('[data-photo]'); if (b) openPhoto(+b.dataset.photo); });
 
 const listEl = $('#list');
 const openList = () => { listEl.hidden = false; document.body.classList.add('is-list'); listEl.scrollTop = 0; $('#list-close').focus(); };
 const closeList = () => { listEl.hidden = true; document.body.classList.remove('is-list'); };
 $('#list-close').addEventListener('click', closeList);
+
 
 /* ---------- étiquettes de zone ---------- */
 const tagEls = {};

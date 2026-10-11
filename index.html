@@ -30,7 +30,7 @@
       <button data-zone="gate"><b>↗</b> Contact</button>
       <button data-action="back" class="nav__back">← Retour au terminal</button>
       <button data-action="about" class="nav__alt">Accueil</button>
-      <button data-action="list" class="nav__alt">Vue liste</button>
+      <button data-action="list" class="nav__alt">Version classique</button>
     </nav>
 
     <div class="zonetags" id="zonetags" aria-hidden="true"></div>
@@ -103,20 +103,17 @@
       <div class="warp__label mono" id="warp-label"></div>
     </div>
 
-    <div class="lightbox" id="lightbox" hidden role="dialog" aria-label="Photo">
-      <figure><img id="lb-img" alt="" /><figcaption class="mono" id="lb-cap"></figcaption></figure>
-      <button class="close" id="lb-close">Fermer ✕</button>
-    </div>
-
     <div class="loader" id="loader"><div class="mono">Chargement du terminal</div><i></i></div>
   </div>
 
-  <section class="list" id="list" aria-label="Contenu du portfolio en liste" hidden>
-    <div class="list__in">
-      <button class="close" id="list-close">← Retour au terminal 3D</button>
-      <div id="list-body"></div>
-    </div>
+  <section class="list" id="list" aria-label="Portfolio en version classique" hidden>
+    <div id="list-body"></div>
   </section>
+
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-label="Photo">
+    <figure><img id="lb-img" alt="" /><figcaption class="mono" id="lb-cap"></figcaption></figure>
+    <button class="close" id="lb-close">Fermer ✕</button>
+  </div>
 
   <script type="module" src="/src/main.js"></script>
 </body>
