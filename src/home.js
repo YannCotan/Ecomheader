@@ -85,6 +85,18 @@ export function createHome() {
     add(scene, new THREE.PlaneGeometry(1.9, 0.6), new THREE.MeshBasicMaterial({ map: tex(c), transparent: true }), 0.5, 2.5, -2.58);
   }
 
+  // ---------- enseigne YANKO : néon RVB, une teinte par lettre qui défile
+  const yanko = [];
+  'YANKO'.split('').forEach((ch, i) => {
+    const [c, g] = cv(128, 192);
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '700 176px "Barlow Condensed", sans-serif';
+    g.shadowColor = '#fff'; g.shadowBlur = 36; g.fillStyle = '#fff'; g.fillText(ch, 64, 100);
+    g.shadowBlur = 10; g.fillText(ch, 64, 100);
+    const m = new THREE.MeshBasicMaterial({ map: tex(c), transparent: true, depthWrite: false, toneMapped: false });
+    add(scene, new THREE.PlaneGeometry(0.27, 0.405), m, 1.72 + i * 0.28, 2.2, -2.58);
+    yanko.push(m);
+  });
+
   // ---------- bureau
   const wood = S('#7a5a3c', 0.65), dark = S('#17171f', 0.5, 0.4);
   add(scene, B(3.2, 0.06, 0.9), wood, 0.3, 0.76, -2.12);
@@ -286,30 +298,35 @@ export function createHome() {
   L('#ffb878', 8, 10, 0.2, 2.6, 0.2);
 
   // ---------- écrans animés
-  // Écrans fixes (dessinés une seule fois) : un fond d'écran sur le moniteur de gauche, un écran de jeu sur celui de droite
+  // Écran de code (écriture automatique, redessiné ~15 fois par seconde) ; l'écran de jeu, lui, est dessiné une seule fois
   const lines = [
     [['const ', '#c792ea'], ['yann', '#82aaff'], [' = {', '#d6deeb']],
-    [['  role', '#7fdbca'], [': ', '#d6deeb'], ["'fullstack'", '#ecc48d'], [',', '#d6deeb']],
+    [['  role', '#7fdbca'], [': ', '#d6deeb'], ["'développeur fullstack'", '#ecc48d'], [',', '#d6deeb']],
     [['  ville', '#7fdbca'], [': ', '#d6deeb'], ["'Abidjan'", '#ecc48d'], [',', '#d6deeb']],
+    [['  stack', '#7fdbca'], [': [', '#d6deeb'], ["'React'", '#ecc48d'], [', ', '#d6deeb'], ["'Node.js'", '#ecc48d'], [',', '#d6deeb']],
+    [['    ', '#d6deeb'], ["'PostgreSQL'", '#ecc48d'], [', ', '#d6deeb'], ["'Redis'", '#ecc48d'], [', ', '#d6deeb'], ["'Docker'", '#ecc48d'], [']', '#d6deeb'], [',', '#d6deeb']],
     [['  gamer', '#7fdbca'], [': ', '#d6deeb'], ['true', '#ff5874'], [',', '#d6deeb']],
     [['};', '#d6deeb']],
+    [['// prêt à coder avec toi', '#637777']],
   ];
-  function drawWallpaper() {
-    const g = code.g, hz = 210;
-    const sky = g.createLinearGradient(0, 0, 0, hz); sky.addColorStop(0, '#0d0626'); sky.addColorStop(0.55, '#5a1b6e'); sky.addColorStop(1, '#ff5b14'); g.fillStyle = sky; g.fillRect(0, 0, SW, SH);
-    const sun = g.createRadialGradient(430, hz - 10, 4, 430, hz - 10, 90); sun.addColorStop(0, '#fff3c0'); sun.addColorStop(0.5, '#ffb347'); sun.addColorStop(1, 'rgba(255,91,20,0)'); g.fillStyle = sun; g.fillRect(300, 60, 260, 200);
-    g.fillStyle = '#ffd27a'; g.beginPath(); g.arc(430, hz - 10, 54, Math.PI, 0); g.fill();
-    g.fillStyle = '#120a22'; for (let x = 0; x < SW; x += 22) { const h = 30 + ((x * 53) % 80); g.fillRect(x, hz - h, 20, h + 2); }
-    g.fillRect(540, hz - 120, 5, 120); g.fillRect(500, hz - 120, 120, 5); g.fillRect(610, hz - 120, 3, 40);
-    g.fillStyle = '#0a0614'; g.fillRect(0, hz, SW, SH - hz);
-    g.strokeStyle = '#ff2fa8'; g.lineWidth = 1.5;
-    for (let i = -12; i <= 12; i++) { g.beginPath(); g.moveTo(320 + i * 6, hz); g.lineTo(320 + i * 90, SH); g.stroke(); }
-    for (let k = 1; k < 9; k++) { const y = hz + (k * k) * 2.1; g.beginPath(); g.moveTo(0, y); g.lineTo(SW, y); g.stroke(); }
-    // petite fenêtre de code
-    g.fillStyle = 'rgba(1,22,39,.92)'; g.fillRect(24, 28, 250, 124); g.fillStyle = '#0b2942'; g.fillRect(24, 28, 250, 20);
-    g.fillStyle = '#ff5b14'; g.fillRect(32, 34, 8, 8); g.fillStyle = '#f0b400'; g.fillRect(46, 34, 8, 8); g.fillStyle = '#3a7a58'; g.fillRect(60, 34, 8, 8);
-    g.font = '500 14px "IBM Plex Mono", monospace';
-    lines.forEach((l, i) => { let x = 36; for (const [seg, c] of l) { g.fillStyle = c; g.fillText(seg, x, 74 + i * 20); x += g.measureText(seg).width; } });
+  const total = lines.reduce((n, l) => n + l.reduce((m, sg) => m + sg[0].length, 0), 0);
+  function drawCode(t) {
+    const g = code.g; g.fillStyle = '#011627'; g.fillRect(0, 0, SW, SH);
+    g.fillStyle = '#0b2942'; g.fillRect(0, 0, SW, 30); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 150, 30); g.fillStyle = '#011627'; g.font = '500 14px "IBM Plex Mono", monospace'; g.fillText('yann.js', 14, 20);
+    g.fillStyle = '#5f7e97'; g.fillText('portfolio.js', 166, 20);
+    g.font = '500 19px "IBM Plex Mono", monospace';
+    let remaining = Math.floor((t * 14) % (total + 40)), y = 62, done = false;
+    lines.forEach((l, i) => {
+      if (done) return;
+      let x = 40; g.fillStyle = '#4b6479'; g.fillText(String(i + 1), 12, y);
+      for (const [seg, c] of l) {
+        const part = seg.slice(0, Math.max(0, remaining));
+        g.fillStyle = c; g.fillText(part, x, y); x += g.measureText(part).width; remaining -= seg.length;
+        if (remaining <= 0) { if (Math.floor(t * 2) % 2) { g.fillStyle = '#ffffff'; g.fillRect(x + 1, y - 16, 10, 22); } done = true; break; }
+      }
+      y += 30;
+    });
+    g.fillStyle = '#0b2942'; g.fillRect(0, SH - 24, SW, 24); g.fillStyle = '#7fdbca'; g.font = '500 13px "IBM Plex Mono", monospace'; g.fillText('main ●  JavaScript  UTF-8', 12, SH - 8);
     code.t.needsUpdate = true;
   }
   function drawGame(t) {
@@ -330,9 +347,12 @@ export function createHome() {
     g.font = '500 13px "IBM Plex Mono", monospace'; g.fillStyle = '#f0b400'; g.fillText('LAP 2/3  P1', 24, 28);
     game.t.needsUpdate = true;
   }
-  drawWallpaper(); drawGame(0.8);
+  drawCode(0); drawGame(0.8);
+  let frame = 0;
 
   function update(dt, t, extra = {}) {
+    if (++frame % 4 === 0) drawCode(t);
+    yanko.forEach((m, i) => m.color.setHSL((t * 0.18 + i * 0.16) % 1, 1, 0.62));
     const h = (t * 0.12) % 1;
     rgbMats.forEach((m, i) => m.emissive.setHSL((h + i * 0.13) % 1, 1, 0.55));
     pink.intensity = 3.2 + Math.sin(t * 2) * 0.6;
