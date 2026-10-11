@@ -340,3 +340,20 @@ fontsReady.then(() => {
   if (!yard) { introEl.classList.add('gone'); document.body.classList.add('no-webgl'); openList(); }
   else gsap.from(introEl.querySelector('.intro__in'), { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out', delay: 0.2 });
 });
+
+/* ---------- téléchargement du CV ----------
+   Sur un hébergement normal, le lien `download` fonctionne tel quel.
+   Dans le viewer claude.ai (où les téléchargements directs sont bloqués), on passe par la capacité « downloads ». */
+document.addEventListener('click', async (e) => {
+  const a = e.target.closest('a[download]');
+  if (!a || !window.claude?.use) return;
+  e.preventDefault();
+  try {
+    const dl = await window.claude.use('downloads');
+    if (!dl) throw new Error('unavailable');
+    const blob = await (await fetch(a.href)).blob();
+    await dl.save({ filename: a.getAttribute('download') || 'CV.pdf', data: blob });
+  } catch (err) {
+    if (err?.code !== 'declined') window.open(a.href, '_blank', 'noopener');
+  }
+});
